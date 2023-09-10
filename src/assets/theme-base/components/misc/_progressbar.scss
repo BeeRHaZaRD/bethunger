@@ -1,0 +1,19 @@
+.p-progressbar {
+    border: $progressBarBorder;
+    height: $progressBarHeight;
+    background: $progressBarBg;
+    border-radius: $borderRadius;
+
+    .p-progressbar-value {
+        border: 0 none;
+        border-top-right-radius: 100px;
+        border-bottom-right-radius: 100px;
+        margin: 0;
+        background: $progressBarValueBg;
+    }
+
+    .p-progressbar-label {
+        color: $progressBarValueTextColor;
+        line-height: $progressBarHeight;
+    }
+}

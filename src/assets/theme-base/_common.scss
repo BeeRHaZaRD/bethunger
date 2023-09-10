@@ -1,0 +1,166 @@
+* {
+	box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+*:before, *:after {
+    box-sizing: inherit;
+}
+
+:focus {
+    outline: none;
+}
+
+html {
+    height: 100%;
+    font-size: 14px;
+    box-sizing: border-box;
+}
+
+body {
+    background-color: $bg-1;
+    color: $textColor;
+    font-family: $fontFamily;
+    overflow-y: scroll !important;
+    overflow-x: hidden;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    color: $textColor;
+}
+
+h1 {
+    font-weight: 500;
+}
+
+h2 {
+    font-weight: 400;
+    margin-bottom: 1rem;
+}
+
+h3 {
+    font-weight: 500;
+    font-size: 1.2rem;
+}
+
+h4 {
+    color: $textSecondaryColor;
+    font-weight: 400;
+    margin-bottom: 0.75rem;
+}
+
+p {
+    font-size: 1rem;
+    color: $textColor;
+    font-weight: 300;
+}
+
+a, router-link {
+    text-decoration: none;
+}
+
+a:hover, router-link:hover {
+    text-decoration: none;
+}
+
+input {
+    outline: 0;
+}
+
+button {
+    border: 0;
+    cursor: pointer;
+}
+
+table {
+    border-spacing: 0;
+    border-collapse: collapse;
+    table-layout: fixed;
+}
+
+.p-component {
+    font-family: $fontFamily;
+    font-size: $fontSize;
+    font-weight: $fontWeight;
+}
+
+.p-component-overlay {
+    background-color: $maskBg;
+    transition-duration: $transitionDuration;
+}
+
+.p-disabled, .p-component:disabled {
+    opacity: $disabledOpacity;
+}
+
+.p-error {
+    color: $errorColor;
+}
+
+.p-text-secondary {
+    color: $textSecondaryColor;
+}
+
+.p-text-blue {
+    color: $primaryColor;
+}
+
+.p-text-green {
+    color: $successColor;
+}
+
+.p-text-orange {
+    color: $warningColor;
+}
+
+.p-text-red {
+    color: $dangerColor;
+}
+
+.pi {
+    font-size: $primeIconFontSize;
+}
+
+.p-icon {
+    width: $primeIconFontSize;
+    height: $primeIconFontSize;
+}
+
+.p-link {
+    font-size: $fontSize;
+    font-family: $fontFamily;
+    border-radius: $borderRadius;
+
+    &:focus {
+        @include focused();
+    }
+}
+
+.p-component-overlay-enter {
+    animation: p-component-overlay-enter-animation 150ms forwards;
+}
+
+.p-component-overlay-leave {
+    animation: p-component-overlay-leave-animation 150ms forwards;
+}
+
+.p-component-overlay {
+    @keyframes p-component-overlay-enter-animation {
+        from {
+            background-color: transparent;
+        }
+        to {
+            background-color: var(--maskbg);
+        }
+    }
+    
+    @keyframes p-component-overlay-leave-animation {
+        from {
+            background-color: var(--maskbg);
+        }
+        to {
+            background-color: transparent;
+        }
+    }
+}

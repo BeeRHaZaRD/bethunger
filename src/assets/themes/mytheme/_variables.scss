@@ -1,0 +1,129 @@
+@use "sass:color";
+
+// Theme Specific Variables
+$bg-1: #101010;
+$bg-2: #1A1A1A;
+$bg-3: #333333;
+$bg-4: #525252;
+
+$darkLightnessRate: -8%;
+$darkerLightnessRate: -16%;
+$bgLightnessRate: -75%;
+
+$primaryColor: #2863fa;
+$primaryDarkColor: color.scale($primaryColor, $lightness: $darkLightnessRate);
+$primaryDarkerColor: color.scale($primaryColor, $lightness: $darkerLightnessRate);
+$primaryBgColor: color.scale($primaryColor, $lightness: $bgLightnessRate);
+$secondaryColor: $bg-3;
+$secondaryDarkColor: color.scale($secondaryColor, $lightness: $darkLightnessRate);
+$secondaryDarkerColor: color.scale($secondaryColor, $lightness: $darkerLightnessRate);
+$successColor: #13B05C;
+$successDarkColor: color.scale($successColor, $lightness: $darkLightnessRate);
+$successDarkerColor: color.scale($successColor, $lightness: $darkerLightnessRate);
+$successBgColor: color.scale($successColor, $lightness: $bgLightnessRate);
+$warningColor: #EF6B25;
+$warningDarkColor: color.scale($warningColor, $lightness: $darkLightnessRate);
+$warningDarkerColor: color.scale($warningColor, $lightness: $darkerLightnessRate);
+$warningBgColor: color.scale($warningColor, $lightness: $bgLightnessRate);
+$dangerColor: #DC283A;
+$dangerDarkColor: color.scale($dangerColor, $lightness: $darkLightnessRate);
+$dangerDarkerColor: color.scale($dangerColor, $lightness: $darkerLightnessRate);
+$dangerBgColor: color.scale($dangerColor, $lightness: $bgLightnessRate);
+$infoColor: #03A9F4;
+$infoDarkColor: color.scale($infoColor, $lightness: $darkLightnessRate);
+$infoDarkerColor: color.scale($infoColor, $lightness: $darkerLightnessRate);
+$infoBgColor: color.scale($infoColor, $lightness: $bgLightnessRate);
+
+$primaryTextColor: #ffffff;
+
+$colors: (
+    "blue": #2196F3,
+    "green": #13B05C,
+    "yellow": #FBC02D,
+    "cyan": #00BCD4,
+    "pink": #E91E63,
+    "indigo": #3F51B5,
+    "teal": #009688,
+    "orange": #F57C00,
+    "bluegray": #607D8B,
+    "purple": #9C27B0,
+    "red": #FF4032,
+    "primary": $primaryColor
+);
+
+$grid-breakpoints: (
+    xs: 0,
+    sm: 576px,
+    md: 768px,
+    lg: 992px,
+    xl: 1200px
+);
+
+// Mandatory Designer Variables
+@import './variables/general';
+@import './variables/form';
+@import './variables/button';
+@import './variables/panel';
+@import './variables/_data';
+@import './variables/_overlay';
+@import './variables/_message';
+@import './variables/_menu';
+@import './variables/_media';
+@import './variables/_misc';
+
+:root {
+    --size-sm: #{map-get($grid-breakpoints, "sm")};
+    --size-md: #{map-get($grid-breakpoints, "md")};
+    --size-lg: #{map-get($grid-breakpoints, "lg")};
+    --size_xl: #{map-get($grid-breakpoints, "xl")};
+    --surface-a:#ffffff;
+    --surface-b:#f8f9fa;
+    --surface-c:#e9ecef;
+    --surface-d:#dee2e6;
+    --surface-e:#ffffff;
+    --surface-f:#ffffff;
+    --text-color:#{$textColor};
+    --text-color-secondary:#{$textSecondaryColor};
+    --primary-color: #3c72fa;
+    --primary-color-text:#ffffff;
+    --font-family: #{$fontFamily};
+    --bg-1: #{$bg-1};
+    --bg-2: #{$bg-2};
+    --bg-3: #{$bg-3};
+    --bg-4: #{$bg-4};
+    --surface-0: #{$bg-1};
+    --surface-50: #282828;
+    --surface-100: #404040;
+    --surface-200: #585858;
+    --surface-300: #707070;
+    --surface-400: #888888;
+    --surface-500: #9F9F9F;
+    --surface-600: #B7B7B7;
+    --surface-700: #CFCFCF;
+    --surface-800: #E7E7E7;
+    --surface-900: #FFFFFF;
+    --gray-50: #E7E7E7;
+    --gray-100: #CFCFCF;
+    --gray-200: #B7B7B7;
+    --gray-300: #9F9F9F;
+    --gray-400: #888888;
+    --gray-500: #707070;
+    --gray-600: #585858;
+    --gray-700: #404040;
+    --gray-800: #282828;
+    --gray-900: #101010;
+    --content-padding:#{$panelContentPadding};
+    --inline-spacing:#{$inlineSpacing};
+    --border-radius:#{$borderRadius};
+    --surface-ground:#{$bg-1};
+    --surface-section:#ffffff;
+    --surface-card:#{$bg-2};
+    --surface-overlay:#{$bg-2};
+    --surface-border:#{$bg-3};
+    --surface-hover:#e9ecef;
+    --focus-ring: #{$focusShadow};
+    --maskbg: #{$maskBg};
+    --highlight-bg: #{$highlightBg};
+    --highlight-text-color: #{$highlightTextColor};
+    color-scheme: dark;
+}
