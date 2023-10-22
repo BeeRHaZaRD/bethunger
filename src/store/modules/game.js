@@ -21,7 +21,8 @@ export const game = {
   getters: {
     statusSeverity: state => GAME_STATUS_SEVERITY[state.status],
     statusText: state => GAME_STATUS[state.status],
-    playersByDistrict: state => Object.assign({}, [...Array(12).keys()].map(i => [state.players[i], state.players[i+12]]))
+    playersByDistrict: state => Object.assign({}, [...Array(12).keys()].map(i => [state.players[i], state.players[i+12]])),
+    playersLeft: state => state.players.filter(player => player.state !== 'dead').length
   },
   mutations: {
     setId(state, id) {
@@ -76,18 +77,27 @@ export const game = {
         commit('setName', game.name);
         commit('setArenaType', game.arenaType);
         commit('setArenaDescription', game.arenaDescription);
-        commit('setDateStart', util.transformDate(game.dateStart));
-        commit('setDateEnd', util.transformDate(game.dateEnd));
+        commit('setDateStart', util.timestampToDateTime(game.dateStart));
+        commit('setDateEnd', util.timestampToDateTime(game.dateEnd));
         commit('setStatus', game.status);
         commit('setDescription', game.description);
         commit('setManager', game.manager);
         commit('setWinner', game.winner);
 
-        commit('setHappenedEvents', game.happenedEvents);
+        commit('setHappenedEvents', game.happenedEvents.reverse());
         commit('setPlayers', game.players);
 
-        console.log("fetchGame end");
         console.log(game);
+      }).catch(e => {
+        console.log(e);
+      });
+    },
+    getAllGames() {
+      return axios({
+        method: 'get',
+        url: '/games'
+      }).then(response => {
+        return response.data;
       }).catch(e => {
         console.log(e);
       });

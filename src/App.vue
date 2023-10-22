@@ -272,7 +272,7 @@ export default {
 .data-list {
     display: grid;
     gap: 0.75rem 1rem;
-    line-height: 1.3rem;
+    line-height: 1.4rem;
 }
 
 /*.data-list > p {

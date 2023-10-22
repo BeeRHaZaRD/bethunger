@@ -3,14 +3,13 @@
         <div class="col-12">
             <div class="content-header">
                 <div class="title">
-                    <h1>Аккаунт</h1>
+                    <h1>Счет</h1>
                 </div>
             </div>
         </div>
         <div class="col-12">
             <div class="section section-balance">
-                <h2>Управление балансом</h2>
-                <p class="balance">Текущий баланс: <strong>{{balance}} &#8381;</strong></p>
+                <h3 class="balance">Текущий баланс: <strong>{{balance}} &#8381;</strong></h3>
                 <div class="balance-buttons">
                     <Button label="Пополнить" @click="$refs.opReplenish.toggle($event)"/>
                     <Button label="Вывести"/>
@@ -56,7 +55,7 @@ export default {
 
 <style scoped>
 .balance {
-    margin-bottom: 1rem;
+    margin-bottom: 1.5rem;
 }
 
 .balance-buttons > * {

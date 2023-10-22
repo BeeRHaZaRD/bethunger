@@ -2,6 +2,7 @@ import {createRouter, createWebHistory} from "vue-router";
 
 import Games from "@/views/Games.vue";
 import Game from "@/views/Game.vue";
+import ControlPanel from "@/views/СontrolPanel.vue";
 import Account from "@/views/Account.vue";
 import Auth from "@/views/Auth.vue";
 
@@ -27,6 +28,13 @@ const routes = [
     {
         path: "/games/:id",
         component: Game,
+        meta: {
+            requireAuth: true
+        }
+    },
+    {
+        path: "/control-panel/:id",
+        component: ControlPanel,
         meta: {
             requireAuth: true
         }

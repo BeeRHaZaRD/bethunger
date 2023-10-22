@@ -3,7 +3,7 @@
         <div class="key">{{time}}</div>
         <div class="value">
             <span class="p-text-blue">{{event.body.player.firstName + ' ' + event.body.player.lastName}}&nbsp;</span>
-            <span>погиб</span>
+            <span class="p-text-red">погиб</span>
         </div>
     </template>
     <template v-if="event.type === 'player_injured'">
@@ -18,15 +18,15 @@
         <div class="key">{{time}}</div>
         <div class="value">
             <span class="p-text-blue">{{event.body.player.firstName + ' ' + event.body.player.lastName}}&nbsp;</span>
-            <span>получил от спонсора <span class="p-text-purple">предмет</span> -&nbsp;</span>
-            <span>{{event.body.item.name}}</span>
+            <span>получил от спонсора&nbsp;</span>
+            <span class="p-text-purple">{{event.body.item.name}}</span>
         </div>
     </template>
     <template v-if="event.type === 'random'">
         <div class="key">{{time}}</div>
         <div class="value" v-if="event.type === 'random'">
-            <span>Началось <span class="p-text-orange">событие</span> -&nbsp;</span>
-            <span>{{event.body.name}}</span>
+            <span>Началось событие —&nbsp;</span>
+            <span class="p-text-orange">{{event.body.name}}</span>
         </div>
     </template>
     <template v-if="event.type === 'other'">
@@ -51,7 +51,7 @@
 
 <script>
 import {defineComponent} from 'vue'
-import {transformDate} from "@/util";
+import {timestampToTime} from "@/util";
 import {INJURY_DEGREE} from "@/enums/enums";
 
 export default defineComponent({
@@ -69,7 +69,7 @@ export default defineComponent({
     },
     computed: {
         time() {
-            return transformDate(this.event.time);
+            return timestampToTime(this.event.time);
         }
     }
 })

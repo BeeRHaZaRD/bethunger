@@ -8,12 +8,24 @@
                         <Tag :value="statusText" :severity="statusSeverity"></Tag>
                     </div>
                     <div class="controls">
-                        <Button class="hidden md:inline-flex" label="Опубликовать" @click="checkValidity"/>
-                        <Button class="md:hidden" icon="pi pi-check" @click="checkValidity"/>
+                        <template v-if="status === 'draft'">
+                            <Button class="hidden md:inline-flex" icon="pi pi-check" label="Опубликовать" @click="checkValidity"/>
+                            <Button class="md:hidden" icon="pi pi-check" @click="checkValidity"/>
+                        </template>
+                        <template v-if="status === 'planned'">
+                            <Button class="hidden md:inline-flex" icon="pi pi-play" label="Начать"/>
+                            <Button class="md:hidden" icon="pi pi-play"/>
+                        </template>
                     </div>
                 </div>
             </div>
             <div class="col-12 xl:col-6 sections">
+                <div class="section-time" v-if="status === 'ongoing' || status === 'completed'">
+                    <div class="time-panel">
+                        <i class="pi pi-clock"></i>
+                        <div class="passed-time">1:14:35:21</div>
+                    </div>
+                </div>
                 <div class="section-info">
                     <h2>Об игре</h2>
                     <div class="card">
@@ -46,7 +58,6 @@
                 </div>
             </div>
             <div class="col-12 xl:col-6">
-                <h2>Участники</h2>
                 <PlayerList :players-by-district="playersByDistrict" @open-modal="openModalPlayer"/>
             </div>
         </div>
@@ -78,6 +89,8 @@ import EventList from "@/components/EventList.vue";
 import PlayerList from "@/components/PlayerList.vue";
 import PlayerInfo from "@/components/PlayerInfo.vue";
 import {mapActions, mapGetters, mapState} from "vuex";
+import Request from 'axios-request-handler';
+import axios from "axios";
 export default {
     components: {
         PlayerList,
@@ -147,18 +160,44 @@ export default {
             this.$router.go(0)
         },
         checkEvents() {
-            setInterval(this.fetchHappenedEvents, 5000);
+            const eventsRequest = new Request('http://localhost:8080/games/' + this.$route.params.id + '/events', {
+                headers: {
+                    'Authorization': axios.defaults.headers.common['Authorization'],
+                    'Accept': 'application/json'
+                },
+                params: {
+                    after: new Date().toISOString()
+                }
+            });
+            eventsRequest.poll(5000).get(response => {
+                console.log(response.data);
+            });
         }
     },
     async mounted() {
         await this.fetchGame(this.$route.params.id);
         this.isGameDataLoaded = true;
-        // this.fetchHappenedEvents(this.$route.params.id);
+        // this.checkEvents();
     }
 }
 </script>
 
 <style scoped>
+.time-panel {
+    display: flex;
+    column-gap: 1.5rem;
+    align-items: center;
+}
+
+.time-panel > i {
+    font-size: 4rem;
+}
+
+.time-panel .passed-time {
+    font-size: 3rem;
+    font-variant-numeric: tabular-nums;
+}
+
 .section-info .data-list {
     grid-template-columns: auto;
 }

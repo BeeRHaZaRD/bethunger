@@ -19,6 +19,7 @@ import Avatar from "primevue/avatar";
 import ProgressBar from "primevue/progressbar";
 import ProgressSpinner from 'primevue/progressspinner';
 import Menu from "primevue/menu";
+import Badge from 'primevue/badge';
 
 export default {
     components: [
@@ -36,7 +37,8 @@ export default {
         Avatar,
         ProgressBar,
         ProgressSpinner,
-        Menu
+        Menu,
+        Badge,
     ],
     config: {
         locale: {

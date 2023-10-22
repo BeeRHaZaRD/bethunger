@@ -1,14 +1,12 @@
 <template>
-    <div>
-        <h2>Ход игры</h2>
-        <div class="card">
-            <div v-if="events.length !== 0" class="data-list">
-                <template v-for="event in events" :key="event.id">
-                    <EventListItem :event="event"/>
-                </template>
-            </div>
-            <p v-else class="text-center text-color-secondary">Пусто</p>
+    <h2>Ход игры</h2>
+    <div class="card">
+        <div v-if="events.length !== 0" class="data-list">
+            <template v-for="event in events" :key="event.id">
+                <EventListItem :event="event"/>
+            </template>
         </div>
+        <p v-else class="text-center text-color-secondary">Пусто</p>
     </div>
 </template>
 

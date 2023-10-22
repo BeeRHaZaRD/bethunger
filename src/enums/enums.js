@@ -20,6 +20,14 @@ export const PLAYER_STATUS = Object.freeze({
   'dead': 'погиб'
 });
 
+export const PLAYER_STATUS_SEVERITY = Object.freeze({
+  'alive': 'success',
+  'slight_injury': 'warning',
+  'moderate_injury': 'warning',
+  'severe_injury': 'warning',
+  'dead': 'danger'
+});
+
 export const INJURY_DEGREE = Object.freeze({
   'slight_injury': 'легкое',
   'moderate_injury': 'значительное',

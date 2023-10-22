@@ -13,18 +13,20 @@
         <div class="col-12">
             <DataTable :value="games" dataKey="id" selectionMode="single" @rowSelect="openGame">
                 <Column field="name" header="Название"></Column>
+                <Column field="manager.fullName" header="Распорядитель"></Column>
                 <Column field="arenaType" header="Арена"></Column>
                 <Column field="dateStart" header="Начало"></Column>
                 <Column field="status" header="Статус"></Column>
+                <Column field="winner.firstName" header="Победитель"></Column>
             </DataTable>
         </div>
     </div>
 </template>
 
 <script>
-import {axiosInstance as axios} from "@/axios";
-import * as util from '@/util.js';
 import {GAME_STATUS} from '@/enums/enums.js'
+import {mapActions} from "vuex";
+import {timestampToDateTime} from "@/util";
 export default {
     data() {
         return {
@@ -32,30 +34,25 @@ export default {
         }
     },
     methods: {
+        ...mapActions({
+            getAllGames: 'game/getAllGames'
+        }),
         openGame(event) {
             this.$router.push(`/games/${event.data.id}`)
         },
-        transformGamesData() {
-            this.games.map(game => {
-                game.dateStart = util.transformDate(game.dateStart);
-                game.status = GAME_STATUS[game.status];
+        transformGamesData(games) {
+            return games.map(game => {
+                game.dateStart = game.dateStart ? timestampToDateTime(game.dateStart) : null;
+                game.status = game.status ? GAME_STATUS[game.status] : null;
+                game.manager.fullName = game.manager ? (game.manager.firstName + ' ' + game.manager.lastName) : null;
+                return game;
             });
         },
-        async getData() {
-            await axios({
-                method: 'get',
-                url: '/games'
-            }).then(response => {
-                console.log(response.data);
-                this.games.push(...response.data);
-                this.transformGamesData();
-            }).catch(e => {
-                console.log(e);
-            });
-        }
     },
-    mounted() {
-        this.getData();
+    async mounted() {
+        let allGames = await this.getAllGames();
+        allGames = this.transformGamesData(allGames);
+        this.games.push(...allGames);
     }
 
 }
