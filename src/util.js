@@ -1,2 +1,4 @@
-export const isEmpty = (value) =>
-    value === null || value === "" || value.length === 0
+export function transformDate(date) {
+    date = new Date(date);
+    return date.toLocaleDateString('ru-RU') + ' ' + date.toLocaleTimeString('ru-RU');
+}

@@ -68,19 +68,19 @@ $progressSpinnerStrokeColor:$errorMessageTextColor !default;
 
 /// First spinner color of a progress spinner
 /// @group misc
-$progressSpinnerColorOne:$errorMessageTextColor !default;
+$progressSpinnerColorOne:$bg-3 !default;
 
 /// Second spinner color of a progress spinner
 /// @group misc
-$progressSpinnerColorTwo:$infoMessageTextColor !default;
+$progressSpinnerColorTwo:$bg-4 !default;
 
 /// Third spinner color of a progress spinner
 /// @group misc
-$progressSpinnerColorThree:$successMessageTextColor !default;
+$progressSpinnerColorThree:$bg-3 !default;
 
 /// Fourth spinner color of a progress spinner
 /// @group misc
-$progressSpinnerColorFour:$warningMessageTextColor !default;
+$progressSpinnerColorFour:$bg-4 !default;
 
 /// Background of an avatar
 /// @group misc

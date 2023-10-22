@@ -7,18 +7,19 @@
                         <Button icon="pi pi-bars" plain text size="large" @click="sidebarVisible = true"/>
                     </div>
                 </div>
-                <div class="topbar-right">
+                <div class="topbar-right" v-if="isUserAuthorized">
                     <div class="balance">
                         <div class="p-text-secondary">Баланс</div>
-                        <div>{{user.balance}} &#8381;</div>
+                        <div>{{userBalance}} &#8381;</div>
                     </div>
-                    <Button :label="user.firstName + ' ' + user.lastName" text icon="pi pi-user"/>
+                    <Button :label="userFullName" @click="toggleUserMenu" text icon="pi pi-user"/>
+                    <Menu ref="userMenu" :model="userMenuItems" :popup="true"/>
                 </div>
             </div>
         </div>
         <div class="sidebar-wrapper" :class="{'active': sidebarVisible}">
             <div class="sidebar">
-                <a class="logo" href="/">BH</a>
+                <router-link class="logo" to="/" @click.native="closeSidebar">BH</router-link>
                 <div class="main-menu">
                     <router-link class="main-menu-item" to="/" @click.native="closeSidebar">
                         <i class="pi pi-home"></i>
@@ -27,7 +28,7 @@
                         <i class="pi pi-th-large"></i>
                     </router-link>
                     <router-link class="main-menu-item" to="/account" @click.native="closeSidebar">
-                        <i class="pi pi-user"></i>
+                        <i class="pi pi-wallet"></i>
                     </router-link>
                 </div>
             </div>
@@ -39,23 +40,66 @@
             </div>
         </div>
     </div>
+    <Toast position="bottom-right"/>
 </template>
 
 <script>
+import {axiosInstance as axios} from "@/axios";
+import {mapActions, mapGetters, mapMutations, mapState} from "vuex";
 export default {
     data() {
         return {
-            user: {
-                firstName: "Иван",
-                lastName: "Иванов",
-                balance: 10500
-            },
-            sidebarVisible: false
+            sidebarVisible: false,
+            userMenuItems: [
+                { label: 'Профиль', icon: 'pi pi-fw pi-user' },
+                { label: 'Настройки', icon: 'pi pi-fw pi-cog' },
+                { separator: true },
+                {
+                    label: 'Выход',
+                    icon: 'pi pi-fw pi-sign-out',
+                    command: () => {
+                        // TODO - Make function logout
+                        localStorage.removeItem('currentUser');
+                        localStorage.removeItem('authToken');
+                        delete axios.defaults.headers.common["Authorization"];
+                        this.setIsAuthorized(false);
+                        this.$router.push('/auth');
+                    }
+                },
+            ]
         }
     },
+    computed: {
+        ...mapState({
+            userBalance: state => state.account.balance,
+            isUserAuthorized: state => state.currentUser.isAuthorized
+        }),
+        ...mapGetters({
+            userFullName: 'currentUser/fullName'
+        })
+    },
     methods: {
+        ...mapMutations({
+            setIsAuthorized: 'currentUser/setIsAuthorized'
+        }),
+        ...mapActions({
+            fetchBalance: 'account/fetchBalance',
+            setUser: 'currentUser/setUser',
+            setAxiosToken: 'currentUser/setAxiosToken'
+        }),
         closeSidebar() {
             this.sidebarVisible = false;
+        },
+        toggleUserMenu(event) {
+            this.$refs.userMenu.toggle(event);
+        }
+    },
+    created() {
+        const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+        if (currentUser) {
+            this.setAxiosToken(JSON.parse(localStorage.getItem('authToken')));
+            this.setUser(currentUser);
+            this.fetchBalance();
         }
     }
 }
@@ -169,9 +213,9 @@ export default {
 
 .sidebar .logo {
     display: block;
-    padding: 15px 0;
+    padding: 20px 0;
     color: #DE9B00;
-    font-size: 2.5rem;
+    font-size: 2rem;
     font-weight: 600;
     text-align: center;
 }
@@ -184,7 +228,7 @@ export default {
 }
 
 .main-menu-item > i {
-    font-size: 1.75rem;
+    font-size: 1.5rem;
 }
 
 .main-menu-item.router-link-active,
@@ -223,6 +267,12 @@ export default {
     background-color: var(--bg-2);
     padding: 0.9rem 1rem;
     border-radius: 6px;
+}
+
+.data-list {
+    display: grid;
+    gap: 0.75rem 1rem;
+    line-height: 1.3rem;
 }
 
 /*.data-list > p {

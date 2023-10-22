@@ -13,7 +13,7 @@
         <div class="col-12">
             <DataTable :value="games" dataKey="id" selectionMode="single" @rowSelect="openGame">
                 <Column field="name" header="Название"></Column>
-                <Column field="arena" header="Арена"></Column>
+                <Column field="arenaType" header="Арена"></Column>
                 <Column field="dateStart" header="Начало"></Column>
                 <Column field="status" header="Статус"></Column>
             </DataTable>
@@ -22,46 +22,42 @@
 </template>
 
 <script>
+import {axiosInstance as axios} from "@/axios";
+import * as util from '@/util.js';
+import {GAME_STATUS} from '@/enums/enums.js'
 export default {
     data() {
         return {
-            games: [
-                {
-                    id: 75,
-                    name: "Голодные игры #75",
-                    arena: "Джунгли",
-                    dateStart: "23/06/2145",
-                    status: "Запланирована"
-                },
-                {
-                    id: 74,
-                    name: "Голодные игры #74",
-                    arena: "Лес",
-                    dateStart: "23/06/2145",
-                    status: "В процессе"
-                },
-                {
-                    id: 73,
-                    name: "Голодные игры #73",
-                    arena: "Разрушенный город",
-                    dateStart: "23/06/2145",
-                    status: "Завершена"
-                },
-                {
-                    id: 72,
-                    name: "Голодные игры #72",
-                    arena: "Остров",
-                    dateStart: "23/06/2145",
-                    status: "Завершена"
-                }
-            ]
+            games: []
         }
     },
     methods: {
         openGame(event) {
             this.$router.push(`/games/${event.data.id}`)
+        },
+        transformGamesData() {
+            this.games.map(game => {
+                game.dateStart = util.transformDate(game.dateStart);
+                game.status = GAME_STATUS[game.status];
+            });
+        },
+        async getData() {
+            await axios({
+                method: 'get',
+                url: '/games'
+            }).then(response => {
+                console.log(response.data);
+                this.games.push(...response.data);
+                this.transformGamesData();
+            }).catch(e => {
+                console.log(e);
+            });
         }
+    },
+    mounted() {
+        this.getData();
     }
+
 }
 </script>
 

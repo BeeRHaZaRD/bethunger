@@ -1,9 +1,11 @@
 import {createApp} from 'vue'
 import App from './App.vue'
 import router from "@/router";
+import store from "@/store";
+
 import PrimeVue from 'primevue/config';
 import ToastService from 'primevue/toastservice';
-import ui from '@/ui'
+import ui from '@/ui';
 
 const app = createApp(App)
 
@@ -14,4 +16,5 @@ ui.components.forEach(component => {
 
 app
     .use(router)
+    .use(store)
     .mount('#app')

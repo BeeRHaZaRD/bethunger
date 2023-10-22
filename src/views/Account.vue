@@ -21,23 +21,35 @@
         <OverlayPanel ref="opReplenish">
             <div class="op-content">
                 <p class="op-title">Пополнение баланса</p>
-                <InputNumber v-model="replenishSum" class="replenish-sum" :minFractionDigits="0" :maxFractionDigits="2" :useGrouping="false" :min="10" :max="1000000" suffix=" &#8381;"/>
-                <Button severity="success" label="Пополнить" />
+                <InputNumber v-model="depositAmount" class="replenish-sum" :minFractionDigits="0" :maxFractionDigits="2" :useGrouping="false" :min="10" :max="1000000" suffix=" &#8381;"/>
+                <Button severity="success" label="Пополнить" @click="deposit(depositAmount)" />
             </div>
         </OverlayPanel>
     </div>
 </template>
 
 <script>
+import {mapActions, mapState} from "vuex";
+
 export default {
     data() {
         return {
-            balance: 10000,
-            replenishSum: null
+            depositAmount: null
         }
     },
+    computed: {
+        ...mapState({
+            balance: state => state.account.balance
+        }),
+    },
     methods: {
-
+        ...mapActions({
+            fetchBalance: 'account/fetchBalance',
+            deposit: 'account/deposit'
+        })
+    },
+    mounted() {
+        this.fetchBalance();
     }
 }
 </script>
