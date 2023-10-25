@@ -1,4 +1,5 @@
-import {axiosInstance as axios} from "@/axios";
+import axios from "@/axios";
+import router from "@/router";
 
 export const currentUser = {
   namespaced: true,
@@ -62,8 +63,18 @@ export const currentUser = {
         console.log(e);
       });
     },
+    logout({commit, dispatch}) {
+      localStorage.removeItem('currentUser');
+      localStorage.removeItem('authToken');
+      dispatch('clearAxiosToken');
+      commit('setIsAuthorized', false);
+      router.push('/auth');
+    },
     setAxiosToken(_, authToken) {
       axios.defaults.headers.common['Authorization'] = 'Bearer ' + authToken;
+    },
+    clearAxiosToken() {
+      delete axios.defaults.headers.common["Authorization"];
     }
   }
 }

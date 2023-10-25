@@ -29,14 +29,39 @@
                 <div class="section-info">
                     <h2>Об игре</h2>
                     <div class="card">
-                        <div class="data-list">
-                            <template v-if="manager.firstName">
+                        <div v-if="status === 'draft'" class="data-list">
+                            <div class="key">Распорядитель:</div>
+                            <div v-if="manager" class="value">{{manager.firstName}} {{manager.lastName}}</div>
+                            <div v-else class="value p-text-secondary">Пусто</div>
+
+                            <div class="key">Начало:</div>
+                            <div v-if="dateStartView" class="value">{{dateStartView}}</div>
+                            <div v-else class="value p-text-secondary">Пусто</div>
+
+                            <div class="key">Тип арены:</div>
+                            <div v-if="arenaType" class="value">{{arenaType}}</div>
+                            <div v-else class="value p-text-secondary">Пусто</div>
+
+                            <div class="key">Описание арены:</div>
+                            <div v-if="arenaDescription" class="value">{{arenaDescription}}</div>
+                            <div v-else class="value p-text-secondary">Пусто</div>
+
+                            <div class="key">Описание турнира:</div>
+                            <div v-if="description" class="value">{{description}}</div>
+                            <div v-else class="value p-text-secondary">Пусто</div>
+                        </div>
+                        <div v-else class="data-list">
+                            <template v-if="manager">
                                 <div class="key">Распорядитель:</div>
                                 <div class="value">{{manager.firstName}} {{manager.lastName}}</div>
                             </template>
-                            <template v-if="dateStart">
+                            <template v-if="dateStartView">
                                 <div class="key">Начало:</div>
-                                <div class="value">{{dateStart}}</div>
+                                <div class="value">{{dateStartView}}</div>
+                            </template>
+                            <template v-if="dateEndView">
+                                <div class="key">Конец:</div>
+                                <div class="value">{{dateEndView}}</div>
                             </template>
                             <template v-if="arenaType">
                                 <div class="key">Тип арены:</div>
@@ -50,6 +75,10 @@
                                 <div class="key">Описание турнира:</div>
                                 <div class="value">{{description}}</div>
                             </template>
+                            <template v-if="winner">
+                                <div class="key">Победитель:</div>
+                                <div class="value">{{winner.firstName}} {{winner.lastName}}</div>
+                            </template>
                         </div>
                     </div>
                 </div>
@@ -58,14 +87,14 @@
                 </div>
             </div>
             <div class="col-12 xl:col-6">
-                <PlayerList :players-by-district="playersByDistrict" @open-modal="openModalPlayer"/>
+                <PlayerList :players-by-district="players" @open-modal="openModalPlayer"/>
             </div>
         </div>
         <Dialog v-model:visible="modalPublishVisible" modal header="Вы действительно хотите оубликовать эту игру?" :style="{width: '600px'}">
             <p>Внимание: публикация игры приведет к тому, что она станет доступна всем пользователям. Отменить данное действие невозможно!</p>
             <template #footer>
                 <Button label="Опубликовать" severity="success" @click="publishGameWrapper" autofocus/>
-                <Button label="Отмена" class="bg-2" @click="modalPublishVisible = false" text />
+                <Button label="Отмена" class="bg-2" @click="modalPublishVisible = false" text/>
             </template>
         </Dialog>
         <Dialog v-if="currentPlayer" v-model:visible="modalPlayerVisible" modal :showHeader="false" :dismissableMask="true" :style="{width: '1100px'}">
@@ -85,12 +114,13 @@
 </template>
 
 <script>
+import moment from "moment";
 import EventList from "@/components/EventList.vue";
 import PlayerList from "@/components/PlayerList.vue";
 import PlayerInfo from "@/components/PlayerInfo.vue";
-import {mapActions, mapGetters, mapState} from "vuex";
-import Request from 'axios-request-handler';
-import axios from "axios";
+import {mapActions, mapState} from "vuex";
+import {GAME_STATUS, GAME_STATUS_SEVERITY} from "@/enums/enums";
+
 export default {
     components: {
         PlayerList,
@@ -108,6 +138,7 @@ export default {
     },
     computed: {
         ...mapState({
+            requiredFields: state => state.game.requiredFields,
             id: state => state.game.id,
             name: state => state.game.name,
             arenaType: state => state.game.arenaType,
@@ -121,17 +152,18 @@ export default {
             happenedEvents: state => state.game.happenedEvents,
             players: state => state.game.players
         }),
-        ...mapGetters({
-            statusSeverity: 'game/statusSeverity',
-            statusText: 'game/statusText',
-            playersByDistrict: 'game/playersByDistrict'
-        })
-        // gameInfoValid() {
-        //     return !isEmpty(this.game.name) && !isEmpty(this.game.arenaType) && this.game.manager.id !== null && !isEmpty(this.game.description);
-        // },
-        // playersValid() {
-        //     return Object.values(this.playersByDistrict).every(pair => pair[0] && pair[1]);
-        // }
+        statusText() {
+            return GAME_STATUS[this.status]
+        },
+        statusSeverity() {
+            return GAME_STATUS_SEVERITY[this.status]
+        },
+        dateStartView() {
+            return this.dateStart && moment(this.dateStart).format('DD.MM.YYYY HH:mm')
+        },
+        dateEndView() {
+            return this.dateEnd && moment(this.dateEnd).format('DD.MM.YYYY HH:mm')
+        }
     },
     methods: {
         ...mapActions({
@@ -144,40 +176,29 @@ export default {
             this.modalPlayerVisible = true;
         },
         checkValidity() {
-            this.modalPublishVisible = true;
-            // if (this.gameInfoValid && this.playersValid) {
-            //     this.modalPublishVisible = true;
-            // } else {
-            //     this.$toast.add({ severity: 'error', summary: 'Ошибка публикации', detail: 'Данные об игре не заполнены', life: 3000 });
-            // }
+            if (this.requiredFields.every(field => this[field] !== null)) {
+                this.modalPublishVisible = true;
+            } else {
+                this.$toast.add({ severity: 'error', summary: 'Ошибка публикации', detail: 'Данные об игре не заполнены', life: 3000 });
+            }
         },
         async publishGameWrapper() {
-            await this.publishGame(this.$route.params.id);
             this.modalPublishVisible = false;
-            // TODO
-            // await this.fetchGame(this.$route.params.id);
-            // this.$toast.add({ severity: 'success', summary: 'Игра успешно опубликована', life: 3000 });
-            this.$router.go(0)
+            await this.publishGame(this.$route.params.id);
+            this.$toast.add({ severity: 'success', summary: 'Игра успешно опубликована', life: 3000 });
         },
         checkEvents() {
-            const eventsRequest = new Request('http://localhost:8080/games/' + this.$route.params.id + '/events', {
-                headers: {
-                    'Authorization': axios.defaults.headers.common['Authorization'],
-                    'Accept': 'application/json'
-                },
-                params: {
-                    after: new Date().toISOString()
-                }
-            });
-            eventsRequest.poll(5000).get(response => {
-                console.log(response.data);
+            this.fetchHappenedEvents({
+                gameId: this.$route.params.id,
+                after: this.happenedEvents[0].time
             });
         }
     },
     async mounted() {
         await this.fetchGame(this.$route.params.id);
         this.isGameDataLoaded = true;
-        // this.checkEvents();
+        // TODO - watcher on status to start/stop polling
+        // setInterval(this.checkEvents, 3000);
     }
 }
 </script>

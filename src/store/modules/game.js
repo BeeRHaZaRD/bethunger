@@ -1,10 +1,9 @@
-import {GAME_STATUS, GAME_STATUS_SEVERITY} from "@/enums/enums";
-import {axiosInstance as axios} from "@/axios";
-import * as util from "@/util";
+import axios from "@/axios";
 
 export const game = {
   namespaced: true,
   state: () => ({
+    requiredFields: [],
     id: 0,
     name: "",
     arenaType: "",
@@ -19,12 +18,12 @@ export const game = {
     players: []
   }),
   getters: {
-    statusSeverity: state => GAME_STATUS_SEVERITY[state.status],
-    statusText: state => GAME_STATUS[state.status],
-    playersByDistrict: state => Object.assign({}, [...Array(12).keys()].map(i => [state.players[i], state.players[i+12]])),
-    playersLeft: state => state.players.filter(player => player.state !== 'dead').length
+    playersLeft: state => Object.values(state.players).flat().filter(player => player && player.state !== 'dead').length
   },
   mutations: {
+    setRequiredFields(state, requiredFields) {
+      state.requiredFields = requiredFields;
+    },
     setId(state, id) {
       state.id = id;
     },
@@ -59,35 +58,47 @@ export const game = {
       state.happenedEvents = happenedEvents;
     },
     addHappenedEvents(state, happenedEvents) {
-      state.happenedEvents.unshift(happenedEvents);
+      state.happenedEvents.unshift(...happenedEvents);
     },
     setPlayers(state, players) {
       state.players = players;
     }
   },
   actions: {
-    async fetchGame({commit}, id) {
+    setGame({commit}, game) {
+      if (game.status === 'draft') {
+        commit('setRequiredFields', ['dateStart', 'arenaType', 'arenaDescription', 'description', 'manager']);
+      }
+      commit('setId', game.id || null);
+      commit('setName', game.name || null);
+      commit('setArenaType', game.arenaType || null);
+      commit('setArenaDescription', game.arenaDescription || null);
+      commit('setDateStart', game.dateStart || null);
+      commit('setDateEnd', game.dateEnd || null);
+      commit('setStatus', game.status || null);
+      commit('setDescription', game.description || null);
+      commit('setManager', game.manager || null);
+      commit('setWinner', game.winner || null);
+      commit('setHappenedEvents', game.happenedEvents.reverse());
+
+      for (let i = 1; i < 13; i++) {
+        if (game.players[i]) {
+          game.players[i][0] ??= null
+          game.players[i][1] ??= null
+        } else {
+          game.players[i] = [null, null]
+        }
+      }
+      // console.log(game.players)
+      commit('setPlayers', game.players);
+    },
+    async fetchGame({dispatch}, id) {
       await axios({
         method: 'get',
         url: '/games/' + id
       }).then(response => {
-        let game = response.data;
-
-        commit('setId', game.id);
-        commit('setName', game.name);
-        commit('setArenaType', game.arenaType);
-        commit('setArenaDescription', game.arenaDescription);
-        commit('setDateStart', util.timestampToDateTime(game.dateStart));
-        commit('setDateEnd', util.timestampToDateTime(game.dateEnd));
-        commit('setStatus', game.status);
-        commit('setDescription', game.description);
-        commit('setManager', game.manager);
-        commit('setWinner', game.winner);
-
-        commit('setHappenedEvents', game.happenedEvents.reverse());
-        commit('setPlayers', game.players);
-
-        console.log(game);
+        dispatch('setGame', response.data);
+        console.log(response.data);
       }).catch(e => {
         console.log(e);
       });
@@ -107,21 +118,23 @@ export const game = {
         method: 'get',
         url: '/games/' + gameId + '/events',
         params: {
-          after: '4040-07-22T21:00:00.000+00:00'
+          after: after
         }
       }).then(response => {
-        commit('addHappenedEvents', response.data);
+        if (response.data.length > 0) {
+          commit('addHappenedEvents', response.data);
+        }
         console.log(response.data);
       }).catch(e => {
         console.log(e);
       });
     },
-    publishGame({commit}, id) {
+    publishGame({dispatch}, id) {
       axios({
         method: 'post',
         url: '/games/' + id + '/publish'
       }).then(response => {
-        console.log("publishGame", response);
+        dispatch('setGame', response.data);
       }).catch(e => {
         console.log(e);
       });

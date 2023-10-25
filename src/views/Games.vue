@@ -15,8 +15,12 @@
                 <Column field="name" header="Название"></Column>
                 <Column field="manager.fullName" header="Распорядитель"></Column>
                 <Column field="arenaType" header="Арена"></Column>
-                <Column field="dateStart" header="Начало"></Column>
-                <Column field="status" header="Статус"></Column>
+                <Column field="dateStartView" header="Начало"></Column>
+                <Column header="Статус">
+                    <template #body="{data}">
+                        <span :class="'p-text-' + GAME_STATUS_SEVERITY[data.status]">{{GAME_STATUS[data.status]}}</span>
+                    </template>
+                </Column>
                 <Column field="winner.firstName" header="Победитель"></Column>
             </DataTable>
         </div>
@@ -24,13 +28,15 @@
 </template>
 
 <script>
-import {GAME_STATUS} from '@/enums/enums.js'
+import moment from "moment";
 import {mapActions} from "vuex";
-import {timestampToDateTime} from "@/util";
+import {GAME_STATUS, GAME_STATUS_SEVERITY} from "@/enums/enums";
 export default {
     data() {
         return {
-            games: []
+            games: [],
+            GAME_STATUS: GAME_STATUS,
+            GAME_STATUS_SEVERITY: GAME_STATUS_SEVERITY
         }
     },
     methods: {
@@ -42,8 +48,7 @@ export default {
         },
         transformGamesData(games) {
             return games.map(game => {
-                game.dateStart = game.dateStart ? timestampToDateTime(game.dateStart) : null;
-                game.status = game.status ? GAME_STATUS[game.status] : null;
+                game.dateStartView = game.dateStart ? moment(game.dateStart).format('DD.MM.YYYY HH:mm') : null;
                 game.manager.fullName = game.manager ? (game.manager.firstName + ' ' + game.manager.lastName) : null;
                 return game;
             });
@@ -51,8 +56,10 @@ export default {
     },
     async mounted() {
         let allGames = await this.getAllGames();
-        allGames = this.transformGamesData(allGames);
-        this.games.push(...allGames);
+        if (allGames) {
+            allGames = this.transformGamesData(allGames);
+            this.games.push(...allGames);
+        }
     }
 
 }

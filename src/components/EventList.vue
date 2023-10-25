@@ -6,7 +6,7 @@
                 <EventListItem :event="event"/>
             </template>
         </div>
-        <p v-else class="text-center text-color-secondary">Пусто</p>
+        <p v-else class="text-center p-text-secondary">Пусто</p>
     </div>
 </template>
 

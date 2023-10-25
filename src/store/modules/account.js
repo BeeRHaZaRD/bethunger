@@ -1,4 +1,4 @@
-import {axiosInstance as axios} from "@/axios";
+import axios from "@/axios";
 
 export const account = {
   namespaced: true,
@@ -17,7 +17,6 @@ export const account = {
         url: '/account/balance'
       }).then(response => {
         commit('setBalance', response.data.balance);
-        console.log(response.data);
       }).catch(e => {
         console.log(e);
       });
@@ -31,7 +30,6 @@ export const account = {
         }
       }).then(response => {
         commit('setBalance', response.data.balance);
-        console.log(response.data);
       }).catch(e => {
         console.log(e);
       });

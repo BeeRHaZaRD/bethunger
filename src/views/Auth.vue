@@ -27,7 +27,6 @@
 
 <script>
 import {mapActions} from "vuex";
-import {axiosInstance as axios} from "@/axios";
 
 export default {
     data() {

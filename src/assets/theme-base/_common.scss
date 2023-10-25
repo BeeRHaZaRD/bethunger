@@ -97,24 +97,33 @@ table {
     color: $errorColor;
 }
 
-.p-text-secondary {
+.p-text-secondary,
+.p-text-gray {
     color: $textSecondaryColor;
 }
 
-.p-text-blue {
+.p-text-primary {
     color: $primaryColor;
 }
 
+.p-text-success,
 .p-text-green {
     color: $successColor;
 }
 
+.p-text-warning,
 .p-text-orange {
     color: $warningColor;
 }
 
+.p-text-danger,
 .p-text-red {
     color: $dangerColor;
+}
+
+.p-text-info,
+.p-text-blue {
+    color: $infoColor;
 }
 
 .p-text-purple {

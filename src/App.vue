@@ -44,7 +44,6 @@
 </template>
 
 <script>
-import {axiosInstance as axios} from "@/axios";
 import {mapActions, mapGetters, mapMutations, mapState} from "vuex";
 export default {
     data() {
@@ -57,14 +56,7 @@ export default {
                 {
                     label: 'Выход',
                     icon: 'pi pi-fw pi-sign-out',
-                    command: () => {
-                        // TODO - Make function logout
-                        localStorage.removeItem('currentUser');
-                        localStorage.removeItem('authToken');
-                        delete axios.defaults.headers.common["Authorization"];
-                        this.setIsAuthorized(false);
-                        this.$router.push('/auth');
-                    }
+                    command: this.logout
                 },
             ]
         }
@@ -85,7 +77,8 @@ export default {
         ...mapActions({
             fetchBalance: 'account/fetchBalance',
             setUser: 'currentUser/setUser',
-            setAxiosToken: 'currentUser/setAxiosToken'
+            setAxiosToken: 'currentUser/setAxiosToken',
+            logout: 'currentUser/logout'
         }),
         closeSidebar() {
             this.sidebarVisible = false;
