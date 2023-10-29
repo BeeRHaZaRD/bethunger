@@ -51,8 +51,8 @@
 
 <script>
 import {defineComponent} from 'vue'
-import {timestampToTime} from "@/util";
 import {INJURY_DEGREE} from "@/enums/enums";
+import moment from "moment";
 
 export default defineComponent({
     name: "EventListItem",
@@ -69,7 +69,7 @@ export default defineComponent({
     },
     computed: {
         time() {
-            return timestampToTime(this.event.time);
+            return moment(this.event.time).format('HH:mm:ss');
         }
     }
 })
