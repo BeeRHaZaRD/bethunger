@@ -87,7 +87,7 @@
                 </div>
             </div>
             <div class="col-12 xl:col-6">
-                <PlayerList :players-by-district="players" @open-modal="openModalPlayer"/>
+                <PlayerList :players-by-district="players" :game-status="status" @open-modal="openModalPlayer"/>
             </div>
         </div>
         <Dialog v-model:visible="modalPublishVisible" modal header="Вы действительно хотите оубликовать эту игру?" :style="{width: '600px'}">
@@ -133,12 +133,13 @@ export default {
             betSum: null,
             modalPublishVisible: false,
             modalPlayerVisible: false,
-            isGameDataLoaded: false
+            isGameDataLoaded: false,
+            eventPollingId: null
         }
     },
     computed: {
         ...mapState({
-            requiredFields: state => state.game.requiredFields,
+            publishRequiredFields: state => state.game.publishRequiredFields,
             id: state => state.game.id,
             name: state => state.game.name,
             arenaType: state => state.game.arenaType,
@@ -176,7 +177,7 @@ export default {
             this.modalPlayerVisible = true;
         },
         checkValidity() {
-            if (this.requiredFields.every(field => this[field] !== null)) {
+            if (this.publishRequiredFields.every(field => this[field] !== null)) {
                 this.modalPublishVisible = true;
             } else {
                 this.$toast.add({ severity: 'error', summary: 'Ошибка публикации', detail: 'Данные об игре не заполнены', life: 3000 });
@@ -187,18 +188,27 @@ export default {
             await this.publishGame(this.$route.params.id);
             this.$toast.add({ severity: 'success', summary: 'Игра успешно опубликована', life: 3000 });
         },
-        checkEvents() {
-            this.fetchHappenedEvents({
+        pollEvents() {
+            if (this.status !== 'ongoing')
+                return
+            this.eventPollingId = setInterval(() => this.fetchHappenedEvents({
                 gameId: this.$route.params.id,
                 after: this.happenedEvents[0].time
-            });
+            }), 5000);
         }
     },
     async mounted() {
         await this.fetchGame(this.$route.params.id);
         this.isGameDataLoaded = true;
+
         // TODO - watcher on status to start/stop polling
-        // setInterval(this.checkEvents, 3000);
+        this.pollEvents();
+    },
+    beforeUnmount() {
+        if (this.eventPollingId) {
+            clearInterval(this.eventPollingId);
+            this.eventPollingId = null;
+        }
     }
 }
 </script>

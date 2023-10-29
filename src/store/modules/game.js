@@ -3,7 +3,7 @@ import axios from "@/axios";
 export const game = {
   namespaced: true,
   state: () => ({
-    requiredFields: [],
+    publishRequiredFields: [],
     id: 0,
     name: "",
     arenaType: "",
@@ -21,8 +21,8 @@ export const game = {
     playersLeft: state => Object.values(state.players).flat().filter(player => player && player.state !== 'dead').length
   },
   mutations: {
-    setRequiredFields(state, requiredFields) {
-      state.requiredFields = requiredFields;
+    setPublishRequiredFields(state, publishRequiredFields) {
+      state.publishRequiredFields = publishRequiredFields;
     },
     setId(state, id) {
       state.id = id;
@@ -57,17 +57,21 @@ export const game = {
     setHappenedEvents(state, happenedEvents) {
       state.happenedEvents = happenedEvents;
     },
-    addHappenedEvents(state, happenedEvents) {
-      state.happenedEvents.unshift(...happenedEvents);
+    addHappenedEvent(state, happenedEvent) {
+      state.happenedEvents.unshift(happenedEvent);
     },
     setPlayers(state, players) {
       state.players = players;
+    },
+    updatePlayerStatus(state, {targetPlayer, newState}) {
+      let genderId = targetPlayer.gender === 'male' ? 0 : 1;
+      state.players[targetPlayer.district][genderId].state = newState;
     }
   },
   actions: {
     setGame({commit}, game) {
       if (game.status === 'draft') {
-        commit('setRequiredFields', ['dateStart', 'arenaType', 'arenaDescription', 'description', 'manager']);
+        commit('setPublishRequiredFields', ['dateStart', 'arenaType', 'arenaDescription', 'description', 'manager']);
       }
       commit('setId', game.id || null);
       commit('setName', game.name || null);
@@ -79,7 +83,7 @@ export const game = {
       commit('setDescription', game.description || null);
       commit('setManager', game.manager || null);
       commit('setWinner', game.winner || null);
-      commit('setHappenedEvents', game.happenedEvents.reverse());
+      commit('setHappenedEvents', game.happenedEvents);
 
       for (let i = 1; i < 13; i++) {
         if (game.players[i]) {
@@ -89,7 +93,6 @@ export const game = {
           game.players[i] = [null, null]
         }
       }
-      // console.log(game.players)
       commit('setPlayers', game.players);
     },
     async fetchGame({dispatch}, id) {
@@ -113,7 +116,7 @@ export const game = {
         console.log(e);
       });
     },
-    fetchHappenedEvents({commit}, {gameId, after}) {
+    fetchHappenedEvents({state, commit}, {gameId, after}) {
       axios({
         method: 'get',
         url: '/games/' + gameId + '/events',
@@ -122,7 +125,18 @@ export const game = {
         }
       }).then(response => {
         if (response.data.length > 0) {
-          commit('addHappenedEvents', response.data);
+          for (let event of response.data.reverse()) {
+            switch (event.type) {
+              case 'player_killed':
+                commit('updatePlayerStatus', {targetPlayer: event.body.player, newState: 'dead'});
+                break;
+              case 'player_injured':
+                commit('updatePlayerStatus', {targetPlayer: event.body.player, newState: event.body.degree});
+                break;
+              // TODO: supply
+            }
+            commit('addHappenedEvent', event);
+          }
         }
         console.log(response.data);
       }).catch(e => {

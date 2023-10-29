@@ -12,22 +12,24 @@
         <template v-for="(players, district) in playersByDistrict" :key="district">
             <div class="district">{{district}}</div>
             <template v-for="player in players">
-                <div v-if="player" class="item" :class="{'disabled': player.state === 'dead'}" @click="$emit('openModal', player)">
+                <div v-if="player" class="item" :class="{'dead': player.state === 'dead'}" @click="$emit('openModal', player)">
                     <div class="avatar">
-                        <Avatar size="large" shape="circle"/>
-                        <Badge class="status-badge" :severity="playerStatusSeverity[player.state]"/>
+                        <Avatar :image="'https://api.dicebear.com/7.x/personas/svg?seed=' + player.id" size="large" shape="circle"/>
+                        <Badge v-if="gameStatus === 'ongoing'" class="status-badge" :severity="playerStatusSeverity[player.state]"/>
                     </div>
                     <div class="item-data">
                         <div class="name">{{player.firstName}} {{player.lastName}}</div>
-                        <div class="buttons" v-if="player.state !== 'dead'">
-                            <Button label="Ставка x1.5" severity="secondary" @click.stop="$refs.opMakeBet.toggle($event)"></Button>
+                        <template v-if="gameStatus === 'ongoing'">
+                            <div class="buttons" v-if="player.state !== 'dead'">
+                                <Button label="Ставка x1.5" severity="secondary" @click.stop="$refs.opMakeBet.toggle($event)"></Button>
 
-                            <Button class="lg:hidden xl:inline-flex" icon="pi pi-box" @click.stop="console.log('supply')"></Button>
-                            <Button class="hidden lg:inline-flex xl:hidden" label="Спонсировать" icon="pi pi-box" @click.stop="console.log('supply')"></Button>
-                        </div>
-                        <div v-else>
-                            <span class="p-text-red">Погиб</span>
-                        </div>
+                                <Button class="lg:hidden xl:inline-flex" icon="pi pi-box" @click.stop="console.log('supply')"></Button>
+                                <Button class="hidden lg:inline-flex xl:hidden" label="Спонсировать" icon="pi pi-box" @click.stop="console.log('supply')"></Button>
+                            </div>
+                            <div v-else>
+                                <span class="p-text-red">Погиб</span>
+                            </div>
+                        </template>
                     </div>
                 </div>
                 <div v-else class="item item-empty p-text-secondary">Пусто</div>
@@ -57,6 +59,10 @@ export default defineComponent({
     props: {
         playersByDistrict: {
             type: Object,
+            required: true
+        },
+        gameStatus: {
+            type: String,
             required: true
         }
     }
@@ -96,7 +102,7 @@ export default defineComponent({
     align-items: center;
 }
 
-.players .item.disabled {
+.players .item.dead {
     opacity: 0.5;
 }
 
@@ -108,7 +114,7 @@ export default defineComponent({
     flex-grow: 1;
 }
 
-.players .item .name {
+.players .item-data > div:not(:last-child) {
     margin-bottom: 0.5rem;
 }
 

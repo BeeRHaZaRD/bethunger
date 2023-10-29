@@ -21,7 +21,7 @@
             <div class="op-content">
                 <p class="op-title">Пополнение баланса</p>
                 <InputNumber v-model="depositAmount" class="replenish-sum" :minFractionDigits="0" :maxFractionDigits="2" :useGrouping="false" :min="10" :max="1000000" suffix=" &#8381;"/>
-                <Button severity="success" label="Пополнить" @click="deposit(depositAmount)" />
+                <Button severity="success" label="Пополнить" @click="depositWrapper(depositAmount)" />
             </div>
         </OverlayPanel>
     </div>
@@ -45,7 +45,11 @@ export default {
         ...mapActions({
             fetchBalance: 'account/fetchBalance',
             deposit: 'account/deposit'
-        })
+        }),
+        async depositWrapper(depositAmount) {
+            await this.deposit(depositAmount);
+            this.$toast.add({ severity: 'success', summary: 'Успешное пополнение', detail: 'Счет пополнен на ' + depositAmount + ' Р', life: 3000 });
+        }
     },
     mounted() {
         this.fetchBalance();

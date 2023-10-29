@@ -1,6 +1,7 @@
 .p-avatar {
     background-color: $avatarBg;
     border-radius: $borderRadius;
+    vertical-align: middle;
 
     &.p-avatar-lg {
         width: 3rem;

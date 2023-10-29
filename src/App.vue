@@ -251,9 +251,8 @@ export default {
     column-gap: 1rem;
 }
 
-
 .sections > div:not(:last-child) {
-  margin-bottom: 2rem;
+    margin-bottom: 2rem;
 }
 
 .card {

@@ -21,8 +21,8 @@ export const account = {
         console.log(e);
       });
     },
-    deposit({commit}, amount) {
-      axios({
+    async deposit({commit}, amount) {
+      await axios({
         method: 'post',
         url: '/account/deposit',
         data: {

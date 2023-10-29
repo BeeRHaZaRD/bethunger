@@ -3,7 +3,7 @@
         <div class="col-12">
             <div class="content-header">
                 <div class="title">
-                    <h1>Все игры</h1>
+                    <h1>Все турниры</h1>
                 </div>
                 <div class="controls">
                     <Button label="Создать игру" icon="pi pi-plus" iconPos="left"/>
@@ -21,7 +21,11 @@
                         <span :class="'p-text-' + GAME_STATUS_SEVERITY[data.status]">{{GAME_STATUS[data.status]}}</span>
                     </template>
                 </Column>
-                <Column field="winner.firstName" header="Победитель"></Column>
+                <Column header="Победитель">
+                    <template #body="{data}">
+                        <span>{{data.winner?.firstName}} {{data.winner?.lastName}}</span>
+                    </template>
+                </Column>
             </DataTable>
         </div>
     </div>
