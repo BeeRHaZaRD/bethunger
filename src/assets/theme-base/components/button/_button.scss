@@ -211,37 +211,37 @@
     
     &.p-button-outlined {
         background-color: transparent;
-        color: $secondaryButtonBg;
+        color: $secondaryButtonTextColor;
         border: $outlinedButtonBorder;
 
         &:enabled:hover {
-            background: rgba($secondaryButtonBg, $textButtonHoverBgOpacity);
-            color: $secondaryButtonBg;
+            background: rgba($secondaryButtonBg, .5);
+            color: $secondaryButtonTextColor;
             border: $outlinedButtonBorder;
         }
 
         &:enabled:active {
-            background: rgba($secondaryButtonBg, $textButtonActiveBgOpacity);
-            color: $secondaryButtonBg;
+            background: rgba($secondaryButtonBg, 1);
+            color: $secondaryButtonTextColor;
             border: $outlinedButtonBorder;
         }
     }
 
     &.p-button-text {
         background-color: transparent;
-        color: $secondaryButtonBg;
+        color: $secondaryButtonTextColor;
         border-color: transparent;
 
         &:enabled:hover {
-            background: rgba($secondaryButtonBg, $textButtonHoverBgOpacity);
+            background: rgba($secondaryButtonBg, .5);
             border-color: transparent;
-            color: $secondaryButtonBg;
+            color: $secondaryButtonTextColor;
         }
 
         &:enabled:active {
-            background: rgba($secondaryButtonBg, $textButtonActiveBgOpacity);
+            background: rgba($secondaryButtonBg, 1);
             border-color: transparent;
-            color: $secondaryButtonBg;
+            color: $secondaryButtonTextColor;
         }
     }
 }

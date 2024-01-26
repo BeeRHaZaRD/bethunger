@@ -8,7 +8,7 @@ $stepsItemBorder: 1px solid $bg-3;
 
 /// Text color of a steps item
 /// @group menu
-$stepsItemTextColor: $textSecondaryColor;
+$stepsItemTextColor: $secondaryTextColor;
 
 /// Width of a steps itrem number
 /// @group menu
@@ -64,7 +64,7 @@ $menuitemTextColor: $textColor;
 
 /// Icon color of a menuitem
 /// @group menu
-$menuitemIconColor: $textSecondaryColor;
+$menuitemIconColor: $secondaryTextColor;
 
 /// Text color of a menuitem in hover state
 /// @group menu
@@ -72,7 +72,7 @@ $menuitemTextHoverColor: $textColor;
 
 /// Icon color of a menuitem in hover state
 /// @group menu
-$menuitemIconHoverColor: $textSecondaryColor;
+$menuitemIconHoverColor: $secondaryTextColor;
 
 /// Background of a menuitem in hover state
 /// @group menu
@@ -84,7 +84,7 @@ $menuitemTextFocusColor: $textColor;
 
 /// Icon color of a menuitem in focus state
 /// @group menu
-$menuitemIconFocusColor: $textSecondaryColor;
+$menuitemIconFocusColor: $secondaryTextColor;
 
 /// Background of a menuitem in focus state
 /// @group menu
@@ -96,7 +96,7 @@ $menuitemTextActiveColor: $textColor;
 
 /// Icon color of a menuitem in active state
 /// @group menu
-$menuitemIconActiveColor: $textSecondaryColor;
+$menuitemIconActiveColor: $secondaryTextColor;
 
 /// Background of a menuitem in active state
 /// @group menu
@@ -124,7 +124,7 @@ $submenuHeaderBg: $bg-2;
 
 /// Text color of a submenu header
 /// @group menu
-$submenuHeaderTextColor: $textSecondaryColor;
+$submenuHeaderTextColor: $secondaryTextColor;
 
 /// Border radius of a submenu header
 /// @group menu
@@ -168,7 +168,7 @@ $breadcrumbBorder: $menuBorder;
 
 /// Text color of a breadcrumb item
 /// @group menu
-$breadcrumbItemTextColor: $textSecondaryColor;
+$breadcrumbItemTextColor: $secondaryTextColor;
 
 /// Icon color of a breadcrumb item
 /// @group menu
@@ -184,7 +184,7 @@ $breadcrumbLastItemIconColor: $menuitemIconColor;
 
 /// Color of a breadcrumb separator
 /// @group menu
-$breadcrumbSeparatorColor: $textSecondaryColor;
+$breadcrumbSeparatorColor: $secondaryTextColor;
 
 /// Padding of a horizontal menu e.g. menubar
 /// @group menu

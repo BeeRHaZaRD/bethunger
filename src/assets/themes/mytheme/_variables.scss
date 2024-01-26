@@ -14,7 +14,7 @@ $primaryColor: #2863fa;
 $primaryDarkColor: color.scale($primaryColor, $lightness: $darkLightnessRate);
 $primaryDarkerColor: color.scale($primaryColor, $lightness: $darkerLightnessRate);
 $primaryBgColor: color.scale($primaryColor, $lightness: $bgLightnessRate);
-$secondaryColor: $bg-3;
+$secondaryColor: $bg-2;
 $secondaryDarkColor: color.scale($secondaryColor, $lightness: $darkLightnessRate);
 $secondaryDarkerColor: color.scale($secondaryColor, $lightness: $darkerLightnessRate);
 $successColor: #13B05C;
@@ -79,7 +79,7 @@ $grid-breakpoints: (
     --size-sm: #{map-get($grid-breakpoints, "sm")};
     --size-md: #{map-get($grid-breakpoints, "md")};
     --size-lg: #{map-get($grid-breakpoints, "lg")};
-    --size_xl: #{map-get($grid-breakpoints, "xl")};
+    --size-xl: #{map-get($grid-breakpoints, "xl")};
     --surface-a:#ffffff;
     --surface-b:#f8f9fa;
     --surface-c:#e9ecef;
@@ -87,7 +87,7 @@ $grid-breakpoints: (
     --surface-e:#ffffff;
     --surface-f:#ffffff;
     --text-color:#{$textColor};
-    --text-color-secondary:#{$textSecondaryColor};
+    --text-color-secondary:#{$secondaryTextColor};
     --primary-color: #3c72fa;
     --primary-color-text:#ffffff;
     --font-family: #{$fontFamily};

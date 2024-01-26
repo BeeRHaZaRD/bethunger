@@ -7701,11 +7701,13 @@
 }
 .field {
   margin-bottom: 1rem;
+  width: fit-content;
 }
 
 .field > label {
-  display: inline-block;
-  margin-bottom: 0.5rem;
+  display: block;
+  padding: 0 0.5rem 0.5rem 0.5rem;
+  color: var(--text-color-secondary);
 }
 
 .field.grid > label {

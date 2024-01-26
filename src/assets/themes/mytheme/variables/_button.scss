@@ -84,7 +84,7 @@ $secondaryButtonBg: $secondaryColor;
 
 /// Text color of a secondary button
 /// @group button
-$secondaryButtonTextColor: #ffffff;
+$secondaryButtonTextColor: $secondaryTextColor;
 
 /// Border of a secondary button
 /// @group button
@@ -96,7 +96,7 @@ $secondaryButtonHoverBg: $secondaryDarkColor;
 
 /// Text color of a secondary button in hover state
 /// @group button
-$secondaryButtonTextHoverColor: #ffffff;
+$secondaryButtonTextHoverColor: $secondaryTextColor;
 
 /// Border color of a secondary button in hover state
 /// @group button
@@ -108,7 +108,7 @@ $secondaryButtonActiveBg: $secondaryDarkerColor;
 
 /// Text color of a secondary button in pressed state
 /// @group button
-$secondaryButtonTextActiveColor: #ffffff;
+$secondaryButtonTextActiveColor: $secondaryTextColor;
 
 /// Border color of a secondary button in pressed state
 /// @group button
@@ -348,7 +348,7 @@ $toggleButtonTextColor: $textColor;
 
 /// Icon color of a toggle button
 /// @group button
-$toggleButtonIconColor: $textSecondaryColor;
+$toggleButtonIconColor: $secondaryTextColor;
 
 /// Background of a toggle button in hover state
 /// @group button
@@ -364,7 +364,7 @@ $toggleButtonTextHoverColor: $textColor;
 
 /// Icon color of a toggle button in hover state
 /// @group button
-$toggleButtonIconHoverColor: $textSecondaryColor;
+$toggleButtonIconHoverColor: $secondaryTextColor;
 
 /// Background of a toggle button in selected state
 /// @group button

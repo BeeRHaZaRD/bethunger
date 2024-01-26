@@ -1,7 +1,7 @@
 .p-dialog {
     border-radius: $borderRadius;
-    box-shadow: $overlayContainerShadow;
     border: $overlayContentBorder;
+    background: $overlayContentBg;
 
     .p-dialog-header {
         border-bottom: $dialogHeaderBorder;
@@ -27,7 +27,6 @@
     }
 
     .p-dialog-content {
-        background: $overlayContentBg;
         color: $panelContentTextColor;
         padding: $dialogContentPadding;
 
@@ -42,7 +41,6 @@
         background: $overlayContentBg;
         color: $panelFooterTextColor;
         padding: $dialogFooterPadding;
-        text-align: right;
         border-bottom-right-radius: $borderRadius;
         border-bottom-left-radius: $borderRadius;
 
