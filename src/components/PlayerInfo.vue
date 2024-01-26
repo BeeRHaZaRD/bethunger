@@ -9,8 +9,12 @@
                     <Tag value="ЗДОРОВ" severity="success"></Tag>
                 </div>
                 <div class="info-text">
-                    <h2 class="title">{{player.firstName}} {{player.lastName}}</h2>
-                    <h4 class="title-description">женщина, 26 лет, 2-й дистрикт</h4>
+                    <h2 class="title">{{player.fullName}}</h2>
+                    <h4 class="title-description">
+                        <span>{{player.sex === 'MALE' ? 'мужчина' : 'женщина'}},</span>
+                        <span>26 лет,</span>
+                        <span>2-й дистрикт</span>
+                    </h4>
                     <p class="description">{{player.description}}</p>
                 </div>
                 <div class="buttons">

@@ -24,7 +24,7 @@
                     <router-link class="main-menu-item" to="/" @click.native="closeSidebar">
                         <i class="pi pi-home"></i>
                     </router-link>
-                    <router-link class="main-menu-item" to="/dashboard" @click.native="closeSidebar">
+                    <router-link class="main-menu-item" to="/admin" @click.native="closeSidebar">
                         <i class="pi pi-th-large"></i>
                     </router-link>
                     <router-link class="main-menu-item" to="/account" @click.native="closeSidebar">
@@ -99,31 +99,9 @@ export default {
 </script>
 
 <style>
-@import "@/assets/common.css";
-
-/*
-.text-blue {
-    color: var(--text-blue);
+textarea {
+    display: block;
 }
-.text-green {
-    color: var(--text-green);
-}
-.text-orange {
-    color: var(--text-orange);
-}
-.text-red {
-    color: var(--text-red);
-}
-.bg-1 {
-    background-color: var(--bg-1)
-}
-.bg-2 {
-    background-color: var(--bg-2)
-}
-.bg-3 {
-    background-color: var(--bg-3)
-}
-*/
 
 .topbar-wrapper {
     position: fixed;
@@ -259,6 +237,17 @@ export default {
     background-color: var(--bg-2);
     padding: 0.9rem 1rem;
     border-radius: 6px;
+    margin-bottom: 1rem;
+}
+
+.data-form {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem 2rem;
+}
+
+.data-form .field {
+    width: auto;
 }
 
 .data-list {
@@ -267,125 +256,14 @@ export default {
     line-height: 1.4rem;
 }
 
-/*.data-list > p {
-    display: flex;
-}
-
-.data-list > p:not(:last-child) {
-    margin-bottom: 0.75rem;
-}*/
-
 .data-list .key {
     font-weight: 500;
     color: var(--text-color-secondary);
 }
 
-/*
-body .p-button {
-    color: #FFFFFF;
-    border: 0 none;
-    padding: 0.66rem 1rem;
+.op-title {
+    margin-bottom: 1rem;
 }
-
-body .p-button:enabled:hover {
-    color: #FFFFFF;
-}
-
-body .btn-primary {
-    background-color: var(--primary);
-}
-
-body .btn-primary:enabled:hover {
-    background-color: var(--primary-hover);
-}
-
-body .btn-primary:enabled:focus {
-    background-color: var(--primary-focus);
-    box-shadow: 0 0 0 2px #1c2127, 0 0 0 4px var(--primary-hover), 0 1px 2px 0 rgba(0, 0, 0, 0);
-}
-
-body .btn-success {
-    background-color: var(--success);
-}
-
-body .btn-success:enabled:hover {
-    background-color: var(--success-hover);
-}
-
-body .btn-success:enabled:focus {
-    background-color: var(--success-focus);
-    box-shadow: 0 0 0 2px #1c2127, 0 0 0 4px var(--success-hover), 0 1px 2px 0 rgba(0, 0, 0, 0);
-}
-
-body .p-datatable {
-    font-size: 16px;
-}
-
-body .p-datatable .p-datatable-thead > tr > th {
-    background-color: #1E1E1E;
-}
-
-body .p-datatable .p-datatable-thead > tr > th:first-child {
-    border-top-left-radius: 6px;
-}
-
-body .p-datatable .p-datatable-thead > tr > th:last-child {
-    border-top-right-radius: 6px;
-}
-
-body .p-datatable .p-datatable-tbody > tr {
-    background-color: transparent;
-}
-
-body .p-datatable .p-datatable-thead > tr > th,
-body .p-datatable .p-datatable-tbody > tr > td {
-    border-color: #242424;
-}
-
-body .p-overlaypanel {
-    background-color: var(--bg-0);
-    border-color: var(--bg-2);
-}
-
-body .p-overlaypanel:before {
-    border-bottom-color: var(--bg-2);
-}
-
-body .p-overlaypanel:after {
-    border-bottom-color: var(--bg-0);
-}
-
-body .p-inputnumber-input {
-    background-color: var(--bg-0);
-    border-color: var(--bg-2);
-}
-
-body .p-inputnumber-input:enabled:hover {
-    border-color: var(--primary-color);
-}
-
-body .p-inputnumber-input:enabled:focus {
-    border-color: var(--primary-color);
-}
-
-body .p-dialog {
-    border-color: var(--bg-2);
-}
-
-body .p-dialog .p-dialog-header,
-body .p-dialog .p-dialog-content,
-body .p-dialog .p-dialog-footer {
-    background-color: var(--bg-0);
-}
-
-body .p-dialog > .p-dialog-footer {
-    display: flex;
-}
-
-body .p-dialog .p-dialog-footer > button {
-    flex-grow: 1;
-}
-*/
 
 /* X-small */
 @media screen and (min-width: 0px) {

@@ -10,7 +10,10 @@ import ui from '@/ui';
 
 const app = createApp(App);
 
-app.use(PrimeVue).use(ToastService);
+app.use(PrimeVue, {
+    locale: ui.config.locale
+});
+app.use(ToastService);
 app.directive('badge', BadgeDirective);
 ui.components.forEach(component => {
     app.component(component.name, component);

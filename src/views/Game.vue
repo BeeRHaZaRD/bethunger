@@ -1,5 +1,5 @@
 <template>
-    <div v-if="isGameDataLoaded">
+    <div v-if="isDataLoaded">
         <div class="grid">
             <div class="col-12">
                 <div class="content-header">
@@ -8,11 +8,15 @@
                         <Tag :value="statusText" :severity="statusSeverity"></Tag>
                     </div>
                     <div class="controls">
-                        <template v-if="status === 'draft'">
+                        <template v-if="status === 'DRAFT' || status === 'PLANNED'">
+                            <Button class="hidden md:inline-flex" icon="pi pi-file-edit" label="Редактировать" outlined @click="$router.push($route.path + '/edit')"/>
+                            <Button class="md:hidden" icon="pi pi-file-edit" outlined/>
+                        </template>
+                        <template v-if="status === 'DRAFT'">
                             <Button class="hidden md:inline-flex" icon="pi pi-check" label="Опубликовать" @click="checkValidity"/>
                             <Button class="md:hidden" icon="pi pi-check" @click="checkValidity"/>
                         </template>
-                        <template v-if="status === 'planned'">
+                        <template v-else-if="status === 'PLANNED'">
                             <Button class="hidden md:inline-flex" icon="pi pi-play" label="Начать"/>
                             <Button class="md:hidden" icon="pi pi-play"/>
                         </template>
@@ -20,16 +24,16 @@
                 </div>
             </div>
             <div class="col-12 xl:col-6 sections">
-                <div class="section-time" v-if="status === 'ongoing' || status === 'completed'">
+                <div class="section-time" v-if="status === 'ONGOING' || status === 'COMPLETED'">
                     <div class="time-panel">
                         <i class="pi pi-clock"></i>
-                        <div class="passed-time">1:14:35:21</div>
+                        <div class="time-passed">1:14:35:21</div>
                     </div>
                 </div>
                 <div class="section-info">
                     <h2>Об игре</h2>
                     <div class="card">
-                        <div v-if="status === 'draft'" class="data-list">
+                        <div v-if="status === 'DRAFT'" class="data-list">
                             <div class="key">Распорядитель:</div>
                             <div v-if="manager" class="value">{{manager.firstName}} {{manager.lastName}}</div>
                             <div v-else class="value p-text-secondary">Пусто</div>
@@ -77,28 +81,34 @@
                             </template>
                             <template v-if="winner">
                                 <div class="key">Победитель:</div>
-                                <div class="value">{{winner.firstName}} {{winner.lastName}}</div>
+                                <div class="value">{{winner.fullName}}</div>
                             </template>
                         </div>
                     </div>
                 </div>
                 <div class="section-events">
-                    <EventList :events="happenedEvents"/>
+                    <h2>Ход игры</h2>
+                    <HappenedEventList :events="happenedEvents"/>
+                </div>
+                <div class="section-planned-events">
+                    <h2>Планировка событий</h2>
+                    <PlannedEventList :planned-events="plannedEvents" :event-types="eventTypes"/>
+                </div>
+                <div class="section-items">
+                    <h2>Предметы</h2>
+                    <ItemList :items="items"/>
                 </div>
             </div>
             <div class="col-12 xl:col-6">
-                <PlayerList :players-by-district="players" :game-status="status" @open-modal="openModalPlayer"/>
+                <PlayerList :players-by-district="players" :game-status="status"/>
             </div>
         </div>
         <Dialog v-model:visible="modalPublishVisible" modal header="Вы действительно хотите оубликовать эту игру?" :style="{width: '600px'}">
             <p>Внимание: публикация игры приведет к тому, что она станет доступна всем пользователям. Отменить данное действие невозможно!</p>
             <template #footer>
-                <Button label="Опубликовать" severity="success" @click="publishGameWrapper" autofocus/>
+                <Button label="Опубликовать" severity="success" @click="publishGameWrapper"/>
                 <Button label="Отмена" class="bg-2" @click="modalPublishVisible = false" text/>
             </template>
-        </Dialog>
-        <Dialog v-if="currentPlayer" v-model:visible="modalPlayerVisible" modal :showHeader="false" :dismissableMask="true" :style="{width: '1100px'}">
-            <PlayerInfo/>
         </Dialog>
         <OverlayPanel ref="opMakeBet">
             <div class="op-content">
@@ -115,25 +125,27 @@
 
 <script>
 import moment from "moment";
-import EventList from "@/components/EventList.vue";
+import {mapActions, mapMutations, mapState} from "vuex";
+import {GAME_STATUS, GAME_STATUS_SEVERITY} from "@/enums/enums";
 import PlayerList from "@/components/PlayerList.vue";
 import PlayerInfo from "@/components/PlayerInfo.vue";
-import {mapActions, mapState} from "vuex";
-import {GAME_STATUS, GAME_STATUS_SEVERITY} from "@/enums/enums";
+import ItemList from "@/components/ItemList.vue";
+import HappenedEventList from "@/components/HappenedEventList.vue";
+import PlannedEventList from "@/components/PlannedEventList.vue";
 
 export default {
     components: {
+        PlannedEventList,
+        ItemList,
         PlayerList,
-        EventList,
+        HappenedEventList,
         PlayerInfo
     },
     data() {
         return {
-            currentPlayer: null,
+            isDataLoaded: false,
             betSum: null,
             modalPublishVisible: false,
-            modalPlayerVisible: false,
-            isGameDataLoaded: false,
             eventPollingId: null
         }
     },
@@ -150,8 +162,11 @@ export default {
             description: state => state.game.description,
             manager: state => state.game.manager,
             winner: state => state.game.winner,
+            eventTypes: state => state.game.eventTypes,
             happenedEvents: state => state.game.happenedEvents,
-            players: state => state.game.players
+            plannedEvents: state => state.game.plannedEvents,
+            players: state => state.game.players,
+            items: state => state.game.items
         }),
         statusText() {
             return GAME_STATUS[this.status]
@@ -167,15 +182,14 @@ export default {
         }
     },
     methods: {
+        ...mapMutations({
+            setPageMode: 'game/setPageMode'
+        }),
         ...mapActions({
             fetchGame: 'game/fetchGame',
             fetchHappenedEvents: 'game/fetchHappenedEvents',
             publishGame: 'game/publishGame'
         }),
-        openModalPlayer(player) {
-            this.currentPlayer = player;
-            this.modalPlayerVisible = true;
-        },
         checkValidity() {
             if (this.publishRequiredFields.every(field => this[field] !== null)) {
                 this.modalPublishVisible = true;
@@ -189,7 +203,7 @@ export default {
             this.$toast.add({ severity: 'success', summary: 'Игра успешно опубликована', life: 3000 });
         },
         pollEvents() {
-            if (this.status !== 'ongoing')
+            if (this.status !== 'ONGOING')
                 return
             this.eventPollingId = setInterval(() => this.fetchHappenedEvents({
                 gameId: this.$route.params.id,
@@ -199,10 +213,12 @@ export default {
     },
     async mounted() {
         await this.fetchGame(this.$route.params.id);
-        this.isGameDataLoaded = true;
+        this.setPageMode('VIEW');
+
+        this.isDataLoaded = true;
 
         // TODO - watcher on status to start/stop polling
-        this.pollEvents();
+        // this.pollEvents();
     },
     beforeUnmount() {
         if (this.eventPollingId) {
@@ -214,6 +230,16 @@ export default {
 </script>
 
 <style scoped>
+.content-header .controls {
+    display: flex;
+    align-items: center;
+    column-gap: 1rem;
+}
+
+.controls > button {
+    height: fit-content;
+}
+
 .time-panel {
     display: flex;
     column-gap: 1.5rem;
@@ -224,7 +250,7 @@ export default {
     font-size: 4rem;
 }
 
-.time-panel .passed-time {
+.time-panel .time-passed {
     font-size: 3rem;
     font-variant-numeric: tabular-nums;
 }

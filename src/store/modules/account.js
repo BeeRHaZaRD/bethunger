@@ -11,8 +11,8 @@ export const account = {
     }
   },
   actions: {
-    fetchBalance({commit}) {
-      axios({
+    async fetchBalance({commit}) {
+      await axios({
         method: 'get',
         url: '/account/balance'
       }).then(response => {

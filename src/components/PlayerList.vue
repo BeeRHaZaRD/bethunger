@@ -1,7 +1,7 @@
 <template>
     <h2 class="title">
         <span>Участники</span>
-        <span class="players-number p-text-secondary">
+        <span class="players-number p-text-secondary" v-if="gameStatus === 'ONGOING'">
             <span class="p-text-green">{{playersLeft}}</span>/24
         </span>
     </h2>
@@ -11,50 +11,42 @@
         <div class="header text-center">Женщина</div>
         <template v-for="(players, district) in playersByDistrict" :key="district">
             <div class="district">{{district}}</div>
-            <template v-for="player in players">
-                <div v-if="player" class="item" :class="{'dead': player.state === 'dead'}" @click="$emit('openModal', player)">
-                    <div class="avatar">
-                        <Avatar :image="'https://api.dicebear.com/7.x/personas/svg?seed=' + player.id" size="large" shape="circle"/>
-                        <Badge v-if="gameStatus === 'ongoing'" class="status-badge" :severity="playerStatusSeverity[player.state]"/>
-                    </div>
-                    <div class="item-data">
-                        <div class="name">{{player.firstName}} {{player.lastName}}</div>
-                        <template v-if="gameStatus === 'ongoing'">
-                            <div class="buttons" v-if="player.state !== 'dead'">
-                                <Button label="Ставка x1.5" severity="secondary" @click.stop="$refs.opMakeBet.toggle($event)"></Button>
-
-                                <Button class="lg:hidden xl:inline-flex" icon="pi pi-box" @click.stop="console.log('supply')"></Button>
-                                <Button class="hidden lg:inline-flex xl:hidden" label="Спонсировать" icon="pi pi-box" @click.stop="console.log('supply')"></Button>
-                            </div>
-                            <div v-else>
-                                <span class="p-text-red">Погиб</span>
-                            </div>
-                        </template>
-                    </div>
-                </div>
-                <div v-else class="item item-empty p-text-secondary">Пусто</div>
+            <template v-for="(player, idx) in players">
+                <PlayerListItem v-if="player" :player="player" :game-status="gameStatus" @select-player="openModalPlayer(player)" @remove-player="removePlayerWrapper"/>
+                <div v-else-if="pageMode === 'VIEW'" class="empty p-text-secondary">Пусто</div>
+                <Button v-else-if="pageMode === 'EDIT'" class="add-player" label="ДОБАВИТЬ" severity="secondary" @click="openOverlay($event, parseInt(district), idx)"/>
             </template>
         </template>
     </div>
+
+    <Dialog v-if="player" v-model:visible="modalPlayerVisible" modal :showHeader="false" :dismissableMask="true" :style="{width: '1100px'}" @hide="player = null">
+        <PlayerInfo/>
+    </Dialog>
+    <OverlayPanel ref="selectPlayerOp">
+        <div class="field p-fluid mb-3">
+            <label for="item">Игрок</label>
+            <AutoComplete v-model="player" input-id="item" dropdown :suggestions="suggestedPlayers" optionLabel="fullName" @complete="searchPlayer" @item-select="addPlayerWrapper"/>
+        </div>
+    </OverlayPanel>
 </template>
 
 <script>
 import {defineComponent} from 'vue'
-import {PLAYER_STATUS_SEVERITY} from "@/enums/enums";
-import {mapGetters} from "vuex";
+import {mapGetters, mapActions, mapState} from 'vuex';
+import {SEX} from "@/enums/enums"
+import PlayerInfo from "@/components/PlayerInfo.vue";
+import PlayerListItem from "@/components/PlayerListItem.vue";
 
 export default defineComponent({
     name: "PlayerList",
-    emits: ['openModal'],
+    components: {PlayerListItem, PlayerInfo},
     data() {
         return {
-            playerStatusSeverity: PLAYER_STATUS_SEVERITY
+            modalPlayerVisible: false,
+            availablePlayers: null,
+            suggestedPlayers: null,
+            player: null
         }
-    },
-    computed: {
-        ...mapGetters({
-            playersLeft: 'game/playersLeft'
-        })
     },
     props: {
         playersByDistrict: {
@@ -64,6 +56,57 @@ export default defineComponent({
         gameStatus: {
             type: String,
             required: true
+        }
+    },
+    computed: {
+        ...mapState({
+            pageMode: state => state.game.pageMode
+        }),
+        ...mapGetters({
+            playersLeft: 'game/playersLeft'
+        })
+    },
+    methods: {
+        ...mapActions({
+            getAvailablePlayers: 'game/getAvailablePlayers',
+            addPlayer: 'game/addPlayer',
+            removePlayer: 'game/removePlayer'
+        }),
+        openModalPlayer(player) {
+            this.player = player;
+            this.modalPlayerVisible = true;
+        },
+        async openOverlay(event, district, idx) {
+            this.$refs.selectPlayerOp.toggle(event);
+            this.availablePlayers = await this.getAvailablePlayers({
+                district: district,
+                sex: SEX[idx]
+            });
+        },
+        searchPlayer(event) {
+            this.suggestedPlayers = event.query
+                ? this.availablePlayers.filter(player => player.fullName.toLowerCase().includes(event.query.toLowerCase()))
+                : [...this.availablePlayers];
+        },
+        async addPlayerWrapper(event) {
+            this.$refs.selectPlayerOp.toggle(event.originalEvent);
+            await this.addPlayer({
+                gameId: this.$route.params.id,
+                player: this.player
+            });
+            this.resetData();
+            this.$toast.add({ severity: 'success', summary: 'Игрок успешно добавлен', life: 3000 });
+        },
+        async removePlayerWrapper(player) {
+            await this.removePlayer({
+                gameId: this.$route.params.id,
+                player: player
+            });
+            this.$toast.add({ severity: 'success', summary: 'Игрок успешно удален', life: 3000 });
+        },
+        resetData() {
+            this.player = null;
+            this.availablePlayers = null;
         }
     }
 })
@@ -80,6 +123,16 @@ export default defineComponent({
     gap: 1rem;
 }
 
+.players .empty {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 0.25rem;
+    background-color: var(--bg-2);
+    font-weight: 500;
+    min-height: 70px;
+}
+
 .players .header {
     color: var(--text-color-secondary);
     font-weight: 500;
@@ -91,55 +144,7 @@ export default defineComponent({
     align-items: center;
 }
 
-.players .item {
-    display: flex;
-    position: relative;
-    column-gap: 1rem;
-    border-radius: 0.25rem;
-    background-color: var(--bg-2);
-    padding: 1rem;
-    font-size: 1.06rem;
-    align-items: center;
-}
-
-.players .item.dead {
-    opacity: 0.5;
-}
-
-.players .item:not(.item-empty) {
-    cursor: pointer;
-}
-
-.players .item-data {
-    flex-grow: 1;
-}
-
-.players .item-data > div:not(:last-child) {
-    margin-bottom: 0.5rem;
-}
-
-.players .buttons {
-    display: grid;
-    grid-template-columns: auto max-content;
-    column-gap: 0.5rem;
-}
-
-.players .item-empty {
-    justify-content: center;
-    align-items: center;
-    font-weight: 500;
-}
-
-.avatar {
-    position: relative;
-}
-
-.status-badge {
-    position: absolute;
-    top: 24px;
-    right: -2px;
-    width: 20px;
-    height: 20px;
-    border: 2px solid var(--bg-2);
+.add-player {
+    min-height: 70px;
 }
 </style>

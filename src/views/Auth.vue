@@ -9,13 +9,13 @@
         </div>
         <div class="col-12">
             <div class="section section-auth">
-                <div class="form-auth p-fluid">
+                <div class="p-fluid">
                     <div class="field">
-                        <label class="input-label" for="login">Логин</label>
+                        <label for="login">Логин</label>
                         <InputText id="login" v-model="credentials.login" type="text" autofocus/>
                     </div>
                     <div class="field">
-                        <label class="input-label" for="password">Пароль</label>
+                        <label for="password">Пароль</label>
                         <InputText id="password" v-model="credentials.password" type="password"/>
                     </div>
                     <Button type="submit" label="Войти" @click="authorize"/>

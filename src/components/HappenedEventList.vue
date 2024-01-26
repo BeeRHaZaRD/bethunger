@@ -1,9 +1,8 @@
 <template>
-    <h2>Ход игры</h2>
     <div class="card">
         <div v-if="events.length !== 0" class="data-list">
             <template v-for="event in events" :key="event.id">
-                <EventListItem :event="event"/>
+                <HappenedEventListItem :event="event"/>
             </template>
         </div>
         <p v-else class="text-center p-text-secondary">Пусто</p>
@@ -12,11 +11,11 @@
 
 <script>
 import {defineComponent} from 'vue'
-import EventListItem from "@/components/EventListItem.vue";
+import HappenedEventListItem from "@/components/HappenedEventListItem.vue";
 
 export default defineComponent({
-    name: "EventList",
-    components: {EventListItem},
+    name: "HappenedEventList",
+    components: { HappenedEventListItem },
     props: {
         events: {
             type: Array,

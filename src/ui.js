@@ -1,4 +1,3 @@
-// import "primevue/resources/themes/lara-dark-blue/theme.css"
 import "@/assets/themes/mytheme/theme.scss"
 import "@/assets/primeflex.css"
 import "primevue/resources/primevue.min.css"
@@ -8,18 +7,20 @@ import Button from 'primevue/button';
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 import Dialog from 'primevue/dialog';
-import DynamicDialog from 'primevue/dynamicdialog';
 import OverlayPanel from 'primevue/overlaypanel';
 import InputText from "primevue/inputtext";
 import InputNumber from 'primevue/inputnumber';
 import Toast from 'primevue/toast';
-import Sidebar from 'primevue/sidebar';
 import Tag from "primevue/tag";
 import Avatar from "primevue/avatar";
 import ProgressBar from "primevue/progressbar";
 import ProgressSpinner from 'primevue/progressspinner';
 import Menu from "primevue/menu";
 import Badge from 'primevue/badge';
+import AutoComplete from "primevue/autocomplete";
+import Calendar from "primevue/calendar";
+import Textarea from "primevue/textarea";
+import Slider from "primevue/slider";
 
 export default {
     components: [
@@ -27,18 +28,20 @@ export default {
         DataTable,
         Column,
         Dialog,
-        DynamicDialog,
         OverlayPanel,
         InputText,
         InputNumber,
+        AutoComplete,
+        Textarea,
+        Slider,
+        Calendar,
         Toast,
-        Sidebar,
         Tag,
         Avatar,
         ProgressBar,
         ProgressSpinner,
         Menu,
-        Badge,
+        Badge
     ],
     config: {
         locale: {
@@ -52,6 +55,7 @@ export default {
             weak: 'Неделя',
             weekHeader: 'Нед',
             firstDayOfWeek: 1,
+            dateFormat: 'dd.mm.yy'
         }
     }
 }
