@@ -38,6 +38,7 @@
             <div class="content">
                 <router-view/>
             </div>
+            <div class="footer"></div>
         </div>
     </div>
     <Toast position="bottom-right"/>
@@ -99,8 +100,12 @@ export default {
 </script>
 
 <style>
-textarea {
-    display: block;
+.first-lower {
+    display: inline-block;
+}
+
+.first-lower::first-letter {
+    text-transform: lowercase;
 }
 
 .topbar-wrapper {
@@ -147,6 +152,10 @@ textarea {
     min-height: 100vh;
     padding-left: 1rem;
     padding-right: 1rem;
+}
+
+.footer {
+    height: 5rem;
 }
 
 .sidebar-wrapper {
@@ -229,15 +238,10 @@ textarea {
     column-gap: 1rem;
 }
 
-.sections > div:not(:last-child) {
-    margin-bottom: 2rem;
-}
-
 .card {
     background-color: var(--bg-2);
-    padding: 0.9rem 1rem;
+    padding: 0.9rem 1rem 1rem 1rem;
     border-radius: 6px;
-    margin-bottom: 1rem;
 }
 
 .data-form {
@@ -246,13 +250,10 @@ textarea {
     gap: 1rem 2rem;
 }
 
-.data-form .field {
-    width: auto;
-}
-
 .data-list {
     display: grid;
-    gap: 0.75rem 1rem;
+    row-gap: 0.857rem;
+    column-gap: 1rem;
     line-height: 1.4rem;
 }
 
@@ -263,6 +264,28 @@ textarea {
 
 .op-title {
     margin-bottom: 1rem;
+}
+
+.progress-spinner {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.player-card .section-info {
+    display: flex;
+    column-gap: 1rem;
+    align-items: center;
+}
+
+.player-card .section-info .avatar {
+    text-align: center;
+    margin-bottom: 0.5rem;
+}
+
+.player-card .section-info .title {
+    margin-bottom: 0.25rem;
 }
 
 /* X-small */

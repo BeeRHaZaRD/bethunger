@@ -5,7 +5,7 @@
                 <div class="content-header">
                     <div class="title">
                         <h1>{{name}}</h1>
-                        <Tag :value="statusText" :severity="statusSeverity"></Tag>
+                        <Tag :value="GAME_STATUS[status]" :severity="GAME_STATUS_SEVERITY[status]"></Tag>
                     </div>
                     <div class="controls">
                         <template v-if="status === 'DRAFT' || status === 'PLANNED'">
@@ -23,14 +23,17 @@
                     </div>
                 </div>
             </div>
-            <div class="col-12 xl:col-6 sections">
-                <div class="section-time" v-if="status === 'ONGOING' || status === 'COMPLETED'">
+            <div class="col-12 xl:col-6">
+                <div class="section-time mb-5" v-if="status === 'ONGOING' || status === 'COMPLETED'">
                     <div class="time-panel">
                         <i class="pi pi-clock"></i>
-                        <div class="time-passed">1:14:35:21</div>
+                        <div class="time-passed">
+                            <span v-if="status === 'ONGOING'">{{timeLeft}}</span>
+                            <span v-else>{{durationString}}</span>
+                        </div>
                     </div>
                 </div>
-                <div class="section-info">
+                <div class="section-info mb-5">
                     <h2>Об игре</h2>
                     <div class="card">
                         <div v-if="status === 'DRAFT'" class="data-list">
@@ -39,7 +42,7 @@
                             <div v-else class="value p-text-secondary">Пусто</div>
 
                             <div class="key">Начало:</div>
-                            <div v-if="dateStartView" class="value">{{dateStartView}}</div>
+                            <div v-if="dateStart" class="value">{{dateStartString}}</div>
                             <div v-else class="value p-text-secondary">Пусто</div>
 
                             <div class="key">Тип арены:</div>
@@ -59,13 +62,9 @@
                                 <div class="key">Распорядитель:</div>
                                 <div class="value">{{manager.firstName}} {{manager.lastName}}</div>
                             </template>
-                            <template v-if="dateStartView">
+                            <template v-if="dateStart">
                                 <div class="key">Начало:</div>
-                                <div class="value">{{dateStartView}}</div>
-                            </template>
-                            <template v-if="dateEndView">
-                                <div class="key">Конец:</div>
-                                <div class="value">{{dateEndView}}</div>
+                                <div class="value">{{dateStartString}}</div>
                             </template>
                             <template v-if="arenaType">
                                 <div class="key">Тип арены:</div>
@@ -86,11 +85,11 @@
                         </div>
                     </div>
                 </div>
-                <div class="section-events">
+                <div class="section-events mb-5">
                     <h2>Ход игры</h2>
                     <HappenedEventList :events="happenedEvents"/>
                 </div>
-                <div class="section-planned-events">
+                <div class="section-planned-events mb-5">
                     <h2>Планировка событий</h2>
                     <PlannedEventList :planned-events="plannedEvents" :event-types="eventTypes"/>
                 </div>
@@ -124,7 +123,6 @@
 </template>
 
 <script>
-import moment from "moment";
 import {mapActions, mapMutations, mapState} from "vuex";
 import {GAME_STATUS, GAME_STATUS_SEVERITY} from "@/enums/enums";
 import PlayerList from "@/components/PlayerList.vue";
@@ -132,17 +130,16 @@ import PlayerInfo from "@/components/PlayerInfo.vue";
 import ItemList from "@/components/ItemList.vue";
 import HappenedEventList from "@/components/HappenedEventList.vue";
 import PlannedEventList from "@/components/PlannedEventList.vue";
+import {dateTimeToString, formatTimer} from "@/util";
+import {useStopwatch} from 'vue-timer-hook';
+import moment from "moment/moment";
 
 export default {
-    components: {
-        PlannedEventList,
-        ItemList,
-        PlayerList,
-        HappenedEventList,
-        PlayerInfo
-    },
+    components: {PlannedEventList, ItemList, PlayerList, HappenedEventList, PlayerInfo},
     data() {
         return {
+            GAME_STATUS: GAME_STATUS,
+            GAME_STATUS_SEVERITY: GAME_STATUS_SEVERITY,
             isDataLoaded: false,
             betSum: null,
             modalPublishVisible: false,
@@ -157,7 +154,7 @@ export default {
             arenaType: state => state.game.arenaType,
             arenaDescription: state => state.game.arenaDescription,
             dateStart: state => state.game.dateStart,
-            dateEnd: state => state.game.dateEnd,
+            duration: state => state.game.duration,
             status: state => state.game.status,
             description: state => state.game.description,
             manager: state => state.game.manager,
@@ -168,22 +165,21 @@ export default {
             players: state => state.game.players,
             items: state => state.game.items
         }),
-        statusText() {
-            return GAME_STATUS[this.status]
+        dateStartString() {
+            return dateTimeToString(this.dateStart);
         },
-        statusSeverity() {
-            return GAME_STATUS_SEVERITY[this.status]
+        durationString() {
+            const duration = moment.duration(this.duration, 'seconds');
+            return formatTimer(duration.days(), duration.hours(), duration.minutes(), duration.seconds());
         },
-        dateStartView() {
-            return this.dateStart && moment(this.dateStart).format('DD.MM.YYYY HH:mm')
+        timeLeft() {
+            const timer = useStopwatch(Math.round((new Date() - this.dateStart) / 1000), true);
+            return formatTimer(timer.days.value, timer.hours.value, timer.minutes.value, timer.seconds.value);
         },
-        dateEndView() {
-            return this.dateEnd && moment(this.dateEnd).format('DD.MM.YYYY HH:mm')
-        }
     },
     methods: {
         ...mapMutations({
-            setPageMode: 'game/setPageMode'
+            setIsEditMode: 'game/setIsEditMode'
         }),
         ...mapActions({
             fetchGame: 'game/fetchGame',
@@ -205,19 +201,21 @@ export default {
         pollEvents() {
             if (this.status !== 'ONGOING')
                 return
-            this.eventPollingId = setInterval(() => this.fetchHappenedEvents({
-                gameId: this.$route.params.id,
-                after: this.happenedEvents[0].time
-            }), 5000);
+            this.eventPollingId = setInterval(() => {
+                this.fetchHappenedEvents({
+                    gameId: this.$route.params.id,
+                    after: this.happenedEvents[0].happenedAt
+                })
+            }, 10000);
         }
     },
     async mounted() {
         await this.fetchGame(this.$route.params.id);
-        this.setPageMode('VIEW');
+        this.setIsEditMode(false);
 
         this.isDataLoaded = true;
 
-        // TODO - watcher on status to start/stop polling
+        // TODO watcher on status to start/stop polling
         // this.pollEvents();
     },
     beforeUnmount() {
@@ -261,13 +259,6 @@ export default {
 
 .bet-sum {
     margin-right: 0.5rem;
-}
-
-.progress-spinner {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
 }
 
 /* Medium */

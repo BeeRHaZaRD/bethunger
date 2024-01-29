@@ -6,19 +6,19 @@
                     <h1>Все турниры</h1>
                 </div>
                 <div class="controls">
-                    <Button label="Создать игру" icon="pi pi-plus" iconPos="left" @click="openModal"/>
+                    <Button label="Создать игру" icon="pi pi-plus" @click="openModal"/>
                 </div>
             </div>
         </div>
         <div class="col-12">
-            <DataTable :value="games" dataKey="id" selectionMode="single" @rowSelect="openGame">
+            <DataTable :value="games" dataKey="id" selectionMode="single" sort-field="id" :sort-order="1" @rowSelect="openGame">
                 <Column field="name" header="Название"></Column>
                 <Column field="manager.fullName" header="Распорядитель"></Column>
                 <Column field="arenaType" header="Арена"></Column>
-                <Column field="dateStartView" header="Начало"></Column>
+                <Column field="dateStart" header="Начало"></Column>
                 <Column header="Статус">
                     <template #body="{data}">
-                        <span :class="'p-text-' + GAME_STATUS_SEVERITY[data.status]">{{GAME_STATUS[data.status]}}</span>
+                        <span>{{GAME_STATUS[data.status]}}</span>
                     </template>
                 </Column>
                 <Column header="Победитель">
@@ -33,17 +33,17 @@
     <Dialog v-model:visible="modalVisible" modal :show-header="false" :dismissableMask="true" :style="{width: '900px'}">
         <h2>Новая игра</h2>
         <div class="data-form">
-            <div class="field">
+            <div class="field p-fluid">
                 <label for="gameName">Название</label>
-                <InputText id="gameName" v-model="game.name" type="text"/>
+                <InputText id="gameName" v-model="newGame.name" type="text"/>
             </div>
-            <div class="field">
+            <div class="field p-fluid">
                 <label for="gameManager">Распорядитель</label>
-                <AutoComplete v-model="game.manager" input-id="gameManager" dropdown :suggestions="suggestedManagers" optionLabel="name" @complete="searchManager"/>
+                <AutoComplete v-model="newGame.manager" input-id="gameManager" dropdown :suggestions="suggestedManagers" optionLabel="fullName" @complete="searchManager"/>
             </div>
         </div>
         <template #footer>
-            <Button label="Создать игру" severity="success" :disabled="!game.name" @click="createGameWrapper"/>
+            <Button label="Создать игру" severity="success" :disabled="!newGame.name || !newGame.manager?.id" @click="createGameWrapper"/>
         </template>
     </Dialog>
 </template>
@@ -59,49 +59,56 @@ export default {
             GAME_STATUS: GAME_STATUS,
             GAME_STATUS_SEVERITY: GAME_STATUS_SEVERITY,
             modalVisible: false,
-            game: {
+            availableManagers: null,
+            suggestedManagers: null,
+            newGame: {
                 name: null,
                 manager: null
-            },
-            suggestedManagers: null
+            }
         }
     },
     methods: {
         ...mapActions({
-            getAllGames: 'game/getAllGames'
+            getAllGames: 'game/getAllGames',
+            getAllManagers: 'game/getAllManagers',
+            createGame: 'game/createGame'
         }),
         openGame(event) {
             this.$router.push(`/games/${event.data.id}`)
         },
-        // TODO remove dateStartView
-        transformGamesData(games) {
-            return games.map(game => {
-                game.dateStartView = game.dateStart ? moment(game.dateStart).format('DD.MM.YYYY HH:mm') : null;
-                game.manager.fullName = game.manager ? (game.manager.firstName + ' ' + game.manager.lastName) : null;
-                return game;
-            });
-        },
-        openModal() {
+        async openModal() {
             this.modalVisible = true;
+            if (this.availableManagers === null) {
+                this.availableManagers = await this.getAllManagers();
+            }
         },
-        createGameWrapper() {
-
+        searchManager(event) {
+            this.suggestedManagers = event.query
+                ? this.availableManagers.filter(manager => manager.fullName.toLowerCase().includes(event.query.toLowerCase()))
+                : [...this.availableManagers];
         },
-        searchManager() {
-
+        async createGameWrapper() {
+            const game = await this.createGame(this.newGame);
+            this.games.push(game);
+            this.modalVisible = false;
+            this.resetData();
+            this.$toast.add({ severity: 'success', summary: 'Игра успешно создана', life: 3000 });
+        },
+        resetData() {
+            this.newGame.name = null;
+            this.newGame.manager = null;
         }
     },
     async mounted() {
-        let allGames = await this.getAllGames();
-        if (allGames) {
-            allGames = this.transformGamesData(allGames);
-            this.games.push(...allGames);
-        }
+        const games = await this.getAllGames();
+        this.games.push(...games);
     }
 
 }
 </script>
 
 <style scoped>
+.data-form {
 
+}
 </style>

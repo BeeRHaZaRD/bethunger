@@ -7,9 +7,9 @@
     <div v-else class="card">
         <p class="text-center p-text-secondary">Нет запланированных событий</p>
     </div>
-    <Button class="mr-2" label="ДОБАВИТЬ" icon="pi pi-plus" severity="secondary" text @click="openModal"/>
+    <Button v-if="isEditMode" class="mt-3" label="ДОБАВИТЬ" icon="pi pi-plus" severity="secondary" text @click="openModal"/>
 
-    <Dialog v-model:visible="modalVisible" modal :show-header="false" :dismissableMask="true" :style="{width: '900px'}">
+    <Dialog v-if="isEditMode" v-model:visible="modalVisible" modal :show-header="false" :dismissableMask="true" :style="{width: '900px'}">
         <h2>Новое событие</h2>
         <div class="data-form">
             <div class="field p-fluid">
@@ -17,12 +17,12 @@
                 <AutoComplete v-model="plannedEvent.eventType" input-id="eventType" dropdown :suggestions="suggestedEventTypes" optionLabel="name" @complete="searchEventType"/>
             </div>
             <div class="field p-fluid">
-                <label for="dateStart">Время запуска</label>
-                <Calendar v-model="plannedEvent.dateStart" input-id="dateStart" showTime hourFormat="24" :min-date="minDate" :panel-style="{width: '359px'}"/>
+                <label for="startAt">Время запуска</label>
+                <Calendar v-model="plannedEvent.startAt" input-id="startAt" showTime hourFormat="24" :min-date="gameDateStart" :panel-style="{width: '359px'}"/>
             </div>
         </div>
         <template #footer>
-            <Button label="Добавить событие" severity="success" :disabled="!plannedEvent.eventType?.id || !plannedEvent.dateStart" @click="addPlannedEventWrapper"/>
+            <Button label="Добавить событие" severity="success" :disabled="!plannedEvent.eventType?.id || !plannedEvent.startAt" @click="addPlannedEventWrapper"/>
         </template>
     </Dialog>
 </template>
@@ -30,31 +30,12 @@
 <script>
 import {defineComponent} from "vue";
 import PlannedEventListItem from "@/components/PlannedEventListItem.vue";
-import {mapActions} from "vuex";
+import {mapActions, mapState} from "vuex";
 import moment from "moment/moment";
 
 export default defineComponent({
     name: "PlannedEventList",
     components: {PlannedEventListItem},
-    data() {
-        return {
-            modalVisible: false,
-            availableEventTypes: null,
-            suggestedEventTypes: null,
-            plannedEvent: {
-                eventType: null,
-                dateStart: null
-            }
-        }
-    },
-    computed: {
-        sortedPlannedEvents() {
-            return this.plannedEvents.sort((a,b) => new Date(a.startAt) - new Date(b.startAt))
-        },
-        minDate() {
-            return new Date();
-        }
-    },
     props: {
         plannedEvents: {
             type: Array,
@@ -63,6 +44,26 @@ export default defineComponent({
         eventTypes: {
             type: Array,
             required: true
+        }
+    },
+    data() {
+        return {
+            modalVisible: false,
+            availableEventTypes: null,
+            suggestedEventTypes: null,
+            plannedEvent: {
+                eventType: null,
+                startAt: null
+            }
+        }
+    },
+    computed: {
+        ...mapState({
+            isEditMode: state => state.game.isEditMode,
+            gameDateStart: state => state.game.dateStart
+        }),
+        sortedPlannedEvents() {
+            return this.plannedEvents.sort((a,b) => new Date(a.startAt) - new Date(b.startAt))
         }
     },
     methods: {
@@ -79,22 +80,25 @@ export default defineComponent({
                 : [...this.eventTypes];
         },
         async addPlannedEventWrapper() {
-            this.modalVisible = false;
             await this.addPlannedEvent({
                 gameId: this.$route.params.id,
                 eventTypeId: this.plannedEvent.eventType.id,
-                startAt: moment(this.plannedEvent.dateStart).format("YYYY-MM-DDTHH:mm:00")
+                startAt: this.plannedEvent.startAt
             });
+            this.modalVisible = false;
             this.resetData();
             this.$toast.add({ severity: 'success', summary: 'Событие успешно добавлено', life: 3000 });
         },
         async removePlannedEventWrapper(plannedEvent) {
-            await this.removePlannedEvent(plannedEvent);
+            await this.removePlannedEvent({
+                gameId: this.$route.params.id,
+                plannedEvent: plannedEvent
+            });
             this.$toast.add({ severity: 'success', summary: 'Событие успешно удалено', life: 3000 });
         },
         resetData() {
             this.plannedEvent.eventType = null;
-            this.plannedEvent.dateStart = null;
+            this.plannedEvent.startAt = null;
         }
     }
 })

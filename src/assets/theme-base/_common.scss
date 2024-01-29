@@ -47,7 +47,6 @@ h3 {
 h4 {
     color: $secondaryTextColor;
     font-weight: 400;
-    margin-bottom: 0.75rem;
 }
 
 p {
@@ -65,6 +64,10 @@ a:hover, router-link:hover {
 
 input {
     outline: 0;
+}
+
+textarea {
+    display: block;
 }
 
 button {
@@ -97,13 +100,13 @@ table {
     color: $errorColor;
 }
 
+.p-text-primary {
+    color: $primaryColor;
+}
+
 .p-text-secondary,
 .p-text-gray {
     color: $secondaryTextColor;
-}
-
-.p-text-primary {
-    color: $primaryColor;
 }
 
 .p-text-success,
@@ -122,12 +125,17 @@ table {
 }
 
 .p-text-info,
-.p-text-blue {
+.p-text-contrast {
     color: $infoColor;
 }
 
+.p-text-help,
 .p-text-purple {
-    color: #9921cc;
+    color: $helpColor;
+}
+
+.pointer {
+    cursor: pointer;
 }
 
 .pi {

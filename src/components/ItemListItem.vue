@@ -7,12 +7,13 @@
             <span class="name">{{item.name}}</span>
             <span class="description">{{item.description}}</span>
         </div>
-        <Button class="btn-remove" icon="pi pi-times" severity="secondary" text @click="$emit('remove', item)"/>
+        <Button v-if="isEditMode" class="btn-remove" icon="pi pi-times" severity="secondary" text @click="$emit('remove', item)"/>
     </div>
 </template>
 
 <script>
 import {defineComponent} from "vue";
+import {mapState} from "vuex";
 
 export default defineComponent({
     name: "ItemListItem",
@@ -22,7 +23,12 @@ export default defineComponent({
             type: Object,
             required: true
         }
-    }
+    },
+    computed: {
+        ...mapState({
+            isEditMode: state => state.game.isEditMode
+        }),
+    },
 })
 </script>
 
@@ -33,6 +39,10 @@ export default defineComponent({
     position: relative;
     border-radius: 6px;
     background-color: var(--bg-2);
+}
+
+.item:not(:last-child) {
+    margin-bottom: 1rem;
 }
 
 .item .image {

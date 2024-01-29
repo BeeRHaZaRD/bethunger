@@ -1,24 +1,24 @@
 <template>
-    <div class="player" :class="{'dead': player.state === 'DEAD'}" @click="$emit('selectPlayer', player)">
+    <div class="player" :class="{'dead': player.status === 'DEAD'}" @click="emitSelectPlayer">
         <div class="avatar">
             <Avatar :image="'https://api.dicebear.com/7.x/personas/svg?seed=' + player.id" size="large" shape="circle"/>
-            <Badge v-if="gameStatus === 'ONGOING'" class="status-badge" :severity="playerStatusSeverity[player.state]"/>
+            <Badge v-if="gameStatus === 'ONGOING'" class="status-badge" :severity="PLAYER_STATUS_SEVERITY[player.status]"/>
         </div>
         <div class="player-data">
             <div class="name">{{player.fullName}}</div>
             <template v-if="gameStatus === 'ONGOING'">
-                <div class="buttons" v-if="player.state !== 'DEAD'">
-                    <Button label="Ставка x1.5" severity="secondary" @click.stop="$refs.opMakeBet.toggle($event)"></Button>
+                <div class="buttons" v-if="player.status !== 'DEAD'">
+                    <Button label="Ставка x1.5" severity="info" @click.stop="$refs.opMakeBet.toggle($event)"/>
 
-                    <Button class="lg:hidden xl:inline-flex" icon="pi pi-box" @click.stop="console.log('supply')"></Button>
-                    <Button class="hidden lg:inline-flex xl:hidden" label="Спонсировать" icon="pi pi-box" @click.stop="console.log('supply')"></Button>
+                    <Button class="lg:hidden xl:inline-flex" icon="pi pi-box" @click.stop="console.log('supply')"/>
+                    <Button class="hidden lg:inline-flex xl:hidden" label="Спонсировать" icon="pi pi-box" @click.stop="console.log('supply')"/>
                 </div>
                 <div v-else>
                     <span class="p-text-red">Погиб</span>
                 </div>
             </template>
         </div>
-        <Button class="btn-remove" icon="pi pi-times" severity="secondary" text @click.stop="$emit('removePlayer', player)"/>
+        <Button v-if="isEditMode && gameStatus === 'DRAFT'" class="btn-remove" icon="pi pi-times" severity="secondary" text @click.stop="$emit('removePlayer', player)"/>
     </div>
 </template>
 
@@ -31,7 +31,7 @@ export default {
     emits: ['selectPlayer', 'removePlayer'],
     data() {
         return {
-            playerStatusSeverity: PLAYER_STATUS_SEVERITY,
+            PLAYER_STATUS_SEVERITY: PLAYER_STATUS_SEVERITY,
         }
     },
     props: {
@@ -46,8 +46,13 @@ export default {
     },
     computed: {
         ...mapState({
-            pageMode: state => state.game.pageMode
+            isEditMode: state => state.game.isEditMode
         })
+    },
+    methods: {
+        emitSelectPlayer() {
+            this.$emit('selectPlayer', this.player);
+        }
     }
 }
 </script>
@@ -58,11 +63,16 @@ export default {
     position: relative;
     column-gap: 1rem;
     border-radius: 0.25rem;
-    background-color: var(--bg-2);
+    background-color: var(--bg-secondary);
     padding: 1rem;
     font-size: 1.06rem;
     align-items: center;
     cursor: pointer;
+    transition: var(--transition);
+}
+
+.player:hover {
+    background-color: var(--bg-secondary-hover);
 }
 
 .player .buttons {

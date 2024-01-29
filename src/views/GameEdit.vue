@@ -5,17 +5,20 @@
                 <div class="content-header">
                     <div class="title">
                         <h1>Редактирование игры</h1>
-                        <Tag :value="statusText" :severity="statusSeverity"></Tag>
+                        <Tag :value="GAME_STATUS[status]" :severity="GAME_STATUS_SEVERITY[status]"></Tag>
+                    </div>
+                    <div class="controls">
+                        <Button label="К игре" icon="pi pi-link" outlined @click="$router.push('/games/' + $route.params.id)"/>
                     </div>
                 </div>
             </div>
-            <div class="col-12 xl:col-6 sections">
-                <div class="section-info">
+            <div class="col-12 xl:col-6">
+                <div class="section-info mb-5">
                     <h2>Информация об игре</h2>
-                    <div class="w-min">
+                    <div class="data-form w-min">
                         <div class="field">
                             <label for="gameName">Название</label>
-                            <InputText id="gameName" v-model="game.name" type="text" disabled/>
+                            <InputText id="gameName" v-model="game.name" type="text"/>
                         </div>
                         <div class="field">
                             <label for="gameDescription">Описание</label>
@@ -36,8 +39,8 @@
                         <Button class="w-full mt-2" label="Сохранить" severity="success" @click="updateGameInfoWrapper"/>
                     </div>
                 </div>
-                <div class="section-planned-events">
-                    <h2>Планировка событий</h2>
+                <div class="section-planned-events mb-5">
+                    <h2>Запланированные события</h2>
                     <PlannedEventList :planned-events="plannedEvents" :event-types="eventTypes"/>
                 </div>
                 <div class="section-items">
@@ -53,24 +56,24 @@
     <div v-else class="progress-spinner">
         <ProgressSpinner strokeWidth="2"/>
     </div>
-<!--    <PlayerTrainsEdit :player=""/>-->
 </template>
 
 <script>
+import {mapActions, mapMutations, mapState} from "vuex";
+import {GAME_STATUS, GAME_STATUS_SEVERITY} from "@/enums/enums";
 import ItemList from "@/components/ItemList.vue";
 import HappenedEventList from "@/components/HappenedEventList.vue";
 import PlayerList from "@/components/PlayerList.vue";
 import PlannedEventList from "@/components/PlannedEventList.vue";
 import PlayerTrainsEdit from "@/components/PlayerTrainsEdit.vue";
-import {mapActions, mapMutations, mapState} from "vuex";
-import {GAME_STATUS, GAME_STATUS_SEVERITY} from "@/enums/enums";
-import moment from "moment/moment";
 
 export default {
     name: "GameEdit",
     components: {PlayerTrainsEdit, PlannedEventList, PlayerList, HappenedEventList, ItemList},
     data() {
         return {
+            GAME_STATUS: GAME_STATUS,
+            GAME_STATUS_SEVERITY: GAME_STATUS_SEVERITY,
             isDataLoaded: false,
             game: {
                 name: null,
@@ -94,17 +97,11 @@ export default {
             plannedEvents: state => state.game.plannedEvents,
             items: state => state.game.items,
             players: state => state.game.players
-        }),
-        statusText() {
-            return GAME_STATUS[this.status]
-        },
-        statusSeverity() {
-            return GAME_STATUS_SEVERITY[this.status]
-        }
+        })
     },
     methods: {
         ...mapMutations({
-            setPageMode: 'game/setPageMode'
+            setIsEditMode: 'game/setIsEditMode'
         }),
         ...mapActions({
             fetchGame: 'game/fetchGame',
@@ -112,12 +109,12 @@ export default {
             updateGameInfo: 'game/updateGameInfo',
             publishGame: 'game/publishGame'
         }),
-        setGame() {
+        setGameData() {
             this.game.name = this.name;
             this.game.description = this.description;
             this.game.arenaType = this.arenaType;
             this.game.arenaDescription = this.arenaDescription;
-            this.game.dateStart = this.dateStart ? moment(this.dateStart).format("DD.MM.YYYY HH:mm") : null;
+            this.game.dateStart = this.dateStart;
         },
         async updateGameInfoWrapper() {
             await this.updateGameInfo({
@@ -129,14 +126,19 @@ export default {
     },
     async mounted() {
         await this.fetchGame(this.$route.params.id);
-        this.setGame();
-        this.setPageMode('EDIT');
-
-        this.isDataLoaded = true;
-    },
+        if (this.status === 'ONGOING') {
+            this.$router.go(-1);
+        } else {
+            this.setGameData();
+            this.setIsEditMode(true);
+            this.isDataLoaded = true;
+        }
+    }
 }
 </script>
 
 <style scoped>
-
+.data-form {
+    grid-template-columns: auto;
+}
 </style>

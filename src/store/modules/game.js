@@ -1,136 +1,99 @@
 import axios from "@/axios";
+import {dateTimeToString, dateTimeToIso} from "@/util"
+import moment from "moment";
 
 export const game = {
   namespaced: true,
   state: () => ({
     publishRequiredFields: [],
-    pageMode: "VIEW", // VIEW | EDIT
+    isEditMode: false,
     id: 0,
-    name: "",
-    arenaType: "",
-    arenaDescription: "",
-    dateStart: "",
-    dateEnd: "",
-    status: "",
-    description: "",
+    name: null,
+    description: null,
+    arenaType: null,
+    arenaDescription: null,
+    dateStart: null,
+    duration: null,
+    status: null,
     manager: {},
     winner: {},
     eventTypes: [],
     happenedEvents: [],
     plannedEvents: [],
-    players: [],
-    items: []
+    items: [],
+    players: []
   }),
   getters: {
-    playersLeft: state => Object.values(state.players).flat().filter(player => player?.state !== 'DEAD').length
+    playersLeft: state => Object.values(state.players).flat()
+        .filter(player => player !== null && player.status !== 'DEAD')
+        .length
   },
   mutations: {
-    setPublishRequiredFields(state, publishRequiredFields) {
-      state.publishRequiredFields = publishRequiredFields;
+    setGame(state, game) {
+      if (game.status === 'draft') {
+        state.publishRequiredFields = ['dateStart', 'arenaType', 'arenaDescription', 'description'];
+      }
+      state.id = game.id;
+      state.name = game.name;
+      state.description = game.description;
+      state.arenaType = game.arenaType;
+      state.arenaDescription = game.arenaDescription;
+      state.dateStart = game.dateStart ? new Date(game.dateStart) : null;
+      state.duration = game.duration;
+      state.status = game.status;
+      state.manager = game.manager;
+      state.winner = game.winner || null;
+      state.eventTypes = game.eventTypes;
+      state.happenedEvents = game.happenedEvents;
+      state.plannedEvents = game.plannedEvents;
+      state.items = game.items;
+      state.players = game.players;
     },
-    setPageMode(state, pageMode) {
-      state.pageMode = pageMode;
-    },
-    setId(state, id) {
-      state.id = id;
-    },
-    setName(state, name) {
-      state.name = name;
-    },
-    setArenaType(state, arenaType) {
-      state.arenaType = arenaType;
-    },
-    setArenaDescription(state, arenaDescription) {
-      state.arenaDescription = arenaDescription;
-    },
-    setDateStart(state, dateStart) {
-      state.dateStart = dateStart;
-    },
-    setDateEnd(state, dateEnd) {
-      state.dateEnd = dateEnd;
-    },
-    setStatus(state, status) {
-      state.status = status;
-    },
-    setDescription(state, description) {
-      state.description = description;
-    },
-    setManager(state, manager) {
-      state.manager = manager;
-    },
-    setWinner(state, winner) {
-      state.winner = winner;
-    },
-    setEventTypes(state, eventTypes) {
-      state.eventTypes = eventTypes;
-    },
-    setHappenedEvents(state, happenedEvents) {
-      state.happenedEvents = happenedEvents;
+    setIsEditMode(state, isEditMode){
+      state.isEditMode = isEditMode;
     },
     addHappenedEvent(state, happenedEvent) {
       state.happenedEvents.unshift(happenedEvent);
     },
-    setPlannedEvents(state, plannedEvents) {
-      state.plannedEvents = plannedEvents;
-    },
     addPlannedEvent(state, plannedEvent) {
       state.plannedEvents.push(plannedEvent);
     },
-    removePlannedEvent(state, targetPlannedEvent) {
-      state.plannedEvents = state.plannedEvents.filter(plannedEvent => plannedEvent.id !== targetPlannedEvent.id);
+    removePlannedEvent(state, plannedEvent) {
+      state.plannedEvents = state.plannedEvents.filter(_plannedEvent => _plannedEvent.id !== plannedEvent.id);
     },
-    setPlayers(state, players) {
-      state.players = players;
+    setPlannedEventStatus(state, {plannedEvent, status}) {
+      state.plannedEvents.find(_plannedEvent => _plannedEvent.id === plannedEvent.id).status = status;
     },
     addPlayer(state, player) {
-      let sex = player.sex === 'MALE' ? 0 : 1;
+      const sex = player.sex === 'MALE' ? 0 : 1;
       state.players[player.district][sex] = player;
     },
     removePlayer(state, player) {
-      let sex = player.sex === 'MALE' ? 0 : 1;
+      const sex = player.sex === 'MALE' ? 0 : 1;
       state.players[player.district][sex] = null;
     },
-    setItems(state, items) {
-      state.items = items;
+    setTrainResults(state, {player, trainResults}) {
+      const sex = player.sex === 'MALE' ? 0 : 1;
+      state.players[player.district][sex].trainResults = trainResults;
     },
     addItem(state, item) {
       state.items.push(item);
     },
-    removeItem(state, targetItem) {
-      state.items = state.items.filter(item => item.id !== targetItem.id);
+    removeItem(state, item) {
+      state.items = state.items.filter(_item => _item.id !== item.id);
     },
-    updatePlayerStatus(state, {player, status}) {
-      let sex = player.sex === 'MALE' ? 0 : 1;
-      state.players[player.district][sex].state = status;
+    setPlayerStatus(state, {player, status}) {
+      const sex = player.sex === 'MALE' ? 0 : 1;
+      state.players[player.district][sex].status = status;
     }
   },
   actions: {
-    setGame({commit}, game) {
-      if (game.status === 'draft') {
-        commit('setPublishRequiredFields', ['dateStart', 'arenaType', 'arenaDescription', 'description']);
-      }
-      commit('setId', game.id || null);
-      commit('setName', game.name || null);
-      commit('setArenaType', game.arenaType || null);
-      commit('setArenaDescription', game.arenaDescription || null);
-      commit('setDateStart', game.dateStart || null);
-      commit('setDateEnd', game.dateEnd || null);
-      commit('setStatus', game.status || null);
-      commit('setDescription', game.description || null);
-      commit('setManager', game.manager || null);
-      commit('setWinner', game.winner || null);
-      commit('setEventTypes', game.eventTypes);
-      commit('setHappenedEvents', game.happenedEvents);
-      commit('setPlannedEvents', game.plannedEvents);
-      commit('setItems', game.items)
-      commit('setPlayers', game.players);
-    },
-    async fetchGame({dispatch}, id) {
-      await axios({
+    fetchGame({commit}, id) {
+      return axios({
         method: 'get',
         url: '/games/' + id
       }).then(response => {
-        dispatch('setGame', response.data);
+        commit('setGame', response.data);
         console.log(response.data);
       }).catch(e => {
         console.log(e);
@@ -141,13 +104,35 @@ export const game = {
         method: 'get',
         url: '/games'
       }).then(response => {
-        return response.data;
+        return response.data.map(game => {
+          // TODO compute dateStart/duration in the target component
+          game.dateStart = dateTimeToString(game.dateStart);
+          game.duration = moment.duration(game.duration, 'seconds');
+          game.manager.fullName = game.manager ? (game.manager.firstName + ' ' + game.manager.lastName) : null;
+          return game;
+        });
       }).catch(e => {
         console.log(e);
       });
     },
-    updateGameInfo({dispatch}, {gameId, game}) {
-      axios({
+    createGame(_, game) {
+      return axios({
+        method: 'post',
+        url: '/games',
+        data: {
+          name: game.name,
+          managerId: game.manager.id
+        }
+      }).then(response => {
+        const newGame = response.data;
+        newGame.manager.fullName = newGame.manager ? (newGame.manager.firstName + ' ' + newGame.manager.lastName) : null;
+        return newGame;
+      }).catch(e => {
+        console.log(e);
+      });
+    },
+    updateGameInfo({commit}, {gameId, game}) {
+      return axios({
         method: 'put',
         url: '/games/' + gameId,
         data: {
@@ -155,20 +140,18 @@ export const game = {
           description: game.description,
           arenaType: game.arenaType,
           arenaDescription: game.arenaDescription,
-          dateStart: game.dateStart
+          dateStart: dateTimeToIso(game.dateStart)
         }
-      }).then(response => {
-        dispatch('setGame', response.data);
       }).catch(e => {
         console.log(e);
       });
     },
-    publishGame({dispatch}, gameId) {
-      axios({
+    publishGame({commit}, gameId) {
+      return axios({
         method: 'post',
         url: '/games/' + gameId + '/publish'
       }).then(response => {
-        dispatch('setGame', response.data);
+        commit('setGame', response.data);
       }).catch(e => {
         console.log(e);
       });
@@ -184,7 +167,7 @@ export const game = {
       });
     },
     addItem({commit}, {gameId, item}) {
-      axios({
+      return axios({
         method: 'post',
         url: '/games/' + gameId + '/items/' + item.id,
       }).then((response) => {
@@ -194,7 +177,7 @@ export const game = {
       });
     },
     removeItem({commit}, {gameId, item}) {
-      axios({
+      return axios({
         method: 'delete',
         url: '/games/' + gameId + '/items/' + item.id
       }).then(() => {
@@ -203,7 +186,7 @@ export const game = {
         console.log(e);
       });
     },
-    getAvailablePlayers({dispatch}, {district, sex}) {
+    getAvailablePlayers({}, {district, sex}) {
       return axios({
         method: 'get',
         url: '/players/available',
@@ -215,7 +198,7 @@ export const game = {
       });
     },
     addPlayer({commit}, {gameId, player}) {
-      axios({
+      return axios({
         method: 'post',
         url: '/games/' + gameId + '/players/' + player.id,
       }).then((response) => {
@@ -225,7 +208,7 @@ export const game = {
       });
     },
     removePlayer({commit}, {gameId, player}) {
-      axios({
+      return axios({
         method: 'delete',
         url: '/games/' + gameId + '/players/' + player.id
       }).then(() => {
@@ -234,11 +217,25 @@ export const game = {
         console.log(e);
       });
     },
+    updateTrainResults({commit}, {player, trainResults}) {
+      return axios({
+        method: 'put',
+        url: '/players/' + player.id + '/trainResults',
+        data: {...trainResults}
+      }).then(() => {
+        commit('setTrainResults', {player, trainResults});
+      }).catch(e => {
+        console.log(e);
+      });
+    },
     addPlannedEvent({commit}, {gameId, eventTypeId, startAt}) {
-      axios({
+      return axios({
         method: 'post',
         url: '/games/' + gameId + '/plannedEvents',
-        data: {eventTypeId, startAt}
+        data: {
+          eventTypeId: eventTypeId,
+          startAt: dateTimeToIso(startAt)
+        }
       }).then((response) => {
         commit('addPlannedEvent', response.data);
       }).catch(e => {
@@ -246,7 +243,7 @@ export const game = {
       });
     },
     removePlannedEvent({commit}, {gameId, plannedEvent}) {
-      axios({
+      return axios({
         method: 'delete',
         url: '/games/' + gameId + '/plannedEvents/' + plannedEvent.id
       }).then(() => {
@@ -255,23 +252,25 @@ export const game = {
         console.log(e);
       });
     },
-    fetchHappenedEvents({state, commit}, {gameId, after}) {
-      axios({
+    fetchHappenedEvents({commit}, {gameId, after}) {
+      return axios({
         method: 'get',
         url: '/games/' + gameId + '/happenedEvents',
         params: {
           after: after
         }
       }).then(response => {
+        console.log(response.data);
         if (response.data.length === 0) {
           return;
         }
         for (let event of response.data.reverse()) {
           switch (event.type) {
             case 'PLAYER':
-              commit('updatePlayerStatus', {player: event.player, status: event.player.status});
+              commit('setPlayerStatus', {player: event.player, status: event.player.status});
               break;
             case 'PLANNED_EVENT':
+              commit('setPlannedEventStatus', {plannedEvent: event.plannedEvent, status: event.plannedEvent.status});
               // TODO PLANNED_EVENT
               break;
             case 'SUPPLY':
@@ -280,7 +279,35 @@ export const game = {
           }
           commit('addHappenedEvent', event);
         }
-        console.log(response.data);
+      }).catch(e => {
+        console.log(e);
+      });
+    },
+    getHappenedEventsByPlayer({commit}, {gameId, playerId}) {
+      return axios({
+        method: 'get',
+        url: '/games/' + gameId + '/happenedEvents',
+        params: {
+          playerId: playerId
+        }
+      }).then(response => {
+        return response.data;
+      }).catch(e => {
+        console.log(e);
+      });
+    },
+    getAllManagers() {
+      return axios({
+        method: 'get',
+        url: '/users',
+        params: {
+          role: 'MANAGER'
+        }
+      }).then(response => {
+        return response.data.map(manager => {
+          manager.fullName = manager.firstName + ' ' + manager.lastName;
+          return manager;
+        });
       }).catch(e => {
         console.log(e);
       });

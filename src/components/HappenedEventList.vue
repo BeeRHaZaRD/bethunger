@@ -5,7 +5,7 @@
                 <HappenedEventListItem :event="event"/>
             </template>
         </div>
-        <p v-else class="text-center p-text-secondary">Пусто</p>
+        <p v-else class="text-center p-text-secondary">Нет событий</p>
     </div>
 </template>
 
@@ -28,6 +28,6 @@ export default defineComponent({
 <style scoped>
 .data-list {
     grid-template-columns: max-content auto;
-    gap: 1rem 0.75rem;
+    column-gap: 0.75rem;
 }
 </style>

@@ -7,7 +7,7 @@
     <div v-else class="card">
         <p class="text-center p-text-secondary">Нет предметов</p>
     </div>
-    <Button label="ДОБАВИТЬ" icon="pi pi-plus" severity="secondary" text @click="openModal"></Button>
+    <Button v-if="isEditMode" class="mt-3" label="ДОБАВИТЬ" icon="pi pi-plus" severity="secondary" text @click="openModal"/>
 
     <Dialog v-model:visible="modalVisible" modal :show-header="false" :dismissableMask="true" :style="{width: '900px'}">
         <h2>Новый предмет</h2>
@@ -39,7 +39,7 @@
 <script>
 import {defineComponent} from "vue";
 import ItemListItem from "@/components/ItemListItem.vue";
-import {mapActions} from "vuex";
+import {mapActions, mapState} from "vuex";
 export default defineComponent({
     name: "ItemList",
     components: {ItemListItem},
@@ -56,6 +56,11 @@ export default defineComponent({
             type: Array,
             required: true
         }
+    },
+    computed: {
+        ...mapState({
+            isEditMode: state => state.game.isEditMode
+        }),
     },
     methods: {
         ...mapActions({
@@ -78,11 +83,11 @@ export default defineComponent({
                 : availableItems;
         },
         async addItemWrapper() {
-            this.modalVisible = false;
             await this.addItem({
                 gameId: this.$route.params.id,
                 item: this.item
             });
+            this.modalVisible = false;
             this.resetData();
             this.$toast.add({ severity: 'success', summary: 'Предмет успешно добавлен', life: 3000 });
         },
@@ -101,10 +106,6 @@ export default defineComponent({
 </script>
 
 <style scoped>
-.items > div {
-    margin-bottom: 1rem;
-}
-
 .data-list {
     grid-template-columns: auto;
 }

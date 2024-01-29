@@ -17,6 +17,11 @@ $primaryBgColor: color.scale($primaryColor, $lightness: $bgLightnessRate);
 $secondaryColor: $bg-2;
 $secondaryDarkColor: color.scale($secondaryColor, $lightness: $darkLightnessRate);
 $secondaryDarkerColor: color.scale($secondaryColor, $lightness: $darkerLightnessRate);
+$secondaryBgColor: color.scale($secondaryColor, $lightness: $bgLightnessRate);
+$infoColor: #282828; // contrast color
+$infoDarkColor: color.scale($infoColor, $lightness: $darkLightnessRate);
+$infoDarkerColor: color.scale($infoColor, $lightness: $darkerLightnessRate);
+$infoBgColor: color.scale($infoColor, $lightness: $bgLightnessRate);
 $successColor: #13B05C;
 $successDarkColor: color.scale($successColor, $lightness: $darkLightnessRate);
 $successDarkerColor: color.scale($successColor, $lightness: $darkerLightnessRate);
@@ -29,14 +34,10 @@ $dangerColor: #DC283A;
 $dangerDarkColor: color.scale($dangerColor, $lightness: $darkLightnessRate);
 $dangerDarkerColor: color.scale($dangerColor, $lightness: $darkerLightnessRate);
 $dangerBgColor: color.scale($dangerColor, $lightness: $bgLightnessRate);
-//$infoColor: #03A9F4;
-//$infoDarkColor: color.scale($infoColor, $lightness: $darkLightnessRate);
-//$infoDarkerColor: color.scale($infoColor, $lightness: $darkerLightnessRate);
-//$infoBgColor: color.scale($infoColor, $lightness: $bgLightnessRate);
-$infoColor: #268de0;
-$infoDarkColor: color.scale($infoColor, $lightness: $darkLightnessRate);
-$infoDarkerColor: color.scale($infoColor, $lightness: $darkerLightnessRate);
-$infoBgColor: color.scale($infoColor, $lightness: $bgLightnessRate);
+$helpColor: #0299de;
+$helpDarkColor: color.scale($helpColor, $lightness: $darkLightnessRate);
+$helpDarkerColor: color.scale($helpColor, $lightness: $darkerLightnessRate);
+$helpBgColor: color.scale($helpColor, $lightness: $bgLightnessRate);
 
 $primaryTextColor: #ffffff;
 
@@ -95,6 +96,9 @@ $grid-breakpoints: (
     --bg-2: #{$bg-2};
     --bg-3: #{$bg-3};
     --bg-4: #{$bg-4};
+    --bg-secondary: #{$secondaryColor};
+    --bg-secondary-hover: #{$secondaryDarkColor};
+    --bg-secondary-active: #{$secondaryDarkerColor};
     --surface-0: #{$bg-1};
     --surface-50: #282828;
     --surface-100: #404040;
@@ -129,5 +133,6 @@ $grid-breakpoints: (
     --maskbg: #{$maskBg};
     --highlight-bg: #{$highlightBg};
     --highlight-text-color: #{$highlightTextColor};
+    --transition: #{$formElementTransition};
     color-scheme: dark;
 }

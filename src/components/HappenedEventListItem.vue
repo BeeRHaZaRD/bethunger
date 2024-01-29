@@ -7,7 +7,7 @@
         </div>
         <div class="value" v-else>
             <span class="p-text-primary">{{event.player.fullName}}&nbsp;</span>
-            <span>получил {{injuryDegree[event.playerEventType]}}&nbsp;</span>
+            <span>получил {{INJURY_DEGREE[event.playerEventType]}}&nbsp;</span>
             <span class="p-text-red">ранение&nbsp;</span>
         </div>
     </template>
@@ -24,13 +24,14 @@
         <div class="value">
             <span>Началось событие —&nbsp;</span>
             <span class="p-text-orange">{{event.plannedEvent.eventType.name}}</span>
+            <span>.&nbsp;{{event.plannedEvent.eventType.description}}</span>
         </div>
     </template>
     <template v-if="event.type === 'OTHER'">
         <div class="key">{{happenedAt}}</div>
         <div class="value">
             <span v-if="event.player" class="p-text-primary">{{event.player.fullName}}&nbsp;</span>
-            <span>{{message}}</span>
+            <span :class="{'first-lower': event.player}">{{event.message}}</span>
         </div>
     </template>
 </template>
@@ -39,13 +40,12 @@
 import {defineComponent} from 'vue'
 import {INJURY_DEGREE} from "@/enums/enums";
 import moment from "moment";
-import {lowercaseFirstChar} from "@/util"
 
 export default defineComponent({
     name: "HappenedEventListItem",
     data() {
         return {
-            injuryDegree: INJURY_DEGREE
+            INJURY_DEGREE: INJURY_DEGREE
         }
     },
     props: {
@@ -56,10 +56,7 @@ export default defineComponent({
     },
     computed: {
         happenedAt() {
-            return moment(this.event.happenedAt).format('HH:mm:ss');
-        },
-        message() {
-            return this.event.message ? lowercaseFirstChar(this.event.message) : null;
+            return moment(this.event.happenedAt).format('DD.MM HH:mm:ss');
         }
     }
 })

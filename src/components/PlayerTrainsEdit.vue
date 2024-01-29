@@ -1,32 +1,38 @@
 <template>
-    <Dialog v-model:visible="modalVisible" modal :show-header="true" header="Результаты тренировок" :draggable="false" :style="{width: '800px'}">
-        <div class="section-info">
+    <div class="player-card">
+        <div class="section-info mb-3">
             <div>
                 <div class="avatar">
-                    <Avatar size="xlarge" shape="circle"></Avatar>
+                    <Avatar :image="'https://api.dicebear.com/7.x/personas/svg?seed=' + player.id" size="xlarge" shape="circle"></Avatar>
                 </div>
-                <Tag value="ЗДОРОВ" severity="success"></Tag>
             </div>
             <div class="info-text">
                 <h2 class="title">{{player.fullName}}</h2>
-                <h4 class="title-description">женщина, 26 лет, 2-й дистрикт</h4>
+                <h4 class="title-description">
+                    <span>{{SEX_NAME[player.sex]}},&nbsp;</span>
+                    <span>{{player.district}}-й дистрикт</span>
+                </h4>
                 <p class="description">{{player.description}}</p>
             </div>
         </div>
-        <div class="section-trains data-form">
-            <div class="field" v-for="(stat, key) in trainStats">
-                <label :for="key">{{stat.name}}</label>
-                <InputNumber v-model.number="stat.value" :input-id="key" class="w-full" readonly :min="0" :max="10"/>
-                <Slider v-model="stat.value" class="w-full" :max="10"/>
+        <div class="section-trains data-form mb-4">
+            <div class="field" v-for="(statValue, statName) in trainResults">
+                <label :for="statName">{{TRAIN_RESULTS_NAME[statName]}}</label>
+                <InputNumber v-model="trainResults[statName]" :input-id="statName" class="w-full" readonly :min="0" :max="10" :input-style="{'text-align': 'center'}"/>
+                <Slider v-model="trainResults[statName]" class="w-full" :max="10"/>
             </div>
         </div>
-        <Button label="Сохранить результаты" severity="success" @click=""/>
-    </Dialog>
+        <Button class="w-full" label="Сохранить результаты" severity="success" @click="updateTrainResultsWrapper"/>
+    </div>
 </template>
 
 <script>
+import {mapActions} from "vuex";
+import {SEX_NAME, TRAIN_RESULTS_NAME} from "@/enums/enums";
+
 export default {
     name: "PlayerTrainsEdit",
+    emits: ['closeModal'],
     props: {
         player: {
             type: Object,
@@ -35,63 +41,48 @@ export default {
     },
     data() {
         return {
-            modalVisible: true,
-            trainStats: {
-                strength: {
-                    name: 'Сила',
-                    value: 0
-                },
-                endurance: {
-                    name: 'Выносливость',
-                    value: 0
-                },
-                agility: {
-                    name: 'Ловкость',
-                    value: 0
-                },
-                stealth: {
-                    name: 'Скрытность',
-                    value: 0
-                },
-                steelArms: {
-                    name: 'Холодное оружие',
-                    value: 0
-                },
-                weapon: {
-                    name: 'Стрелковое оружие',
-                    value: 0
-                },
-                archery: {
-                    name: 'Стрельба из лука',
-                    value: 0
-                },
-                handToHand: {
-                    name: 'Рукопашный бой',
-                    value: 0
-                }
+            TRAIN_RESULTS_NAME: TRAIN_RESULTS_NAME,
+            SEX_NAME: SEX_NAME,
+            trainResults: {
+                strength: 0,
+                endurance: 0,
+                agility: 0,
+                stealth: 0,
+                steelArms: 0,
+                weapon: 0,
+                archery: 0,
+                handToHand: 0
             }
+        }
+    },
+    methods: {
+        ...mapActions({
+            updateTrainResults: 'game/updateTrainResults'
+        }),
+        async updateTrainResultsWrapper() {
+            await this.updateTrainResults({
+                player: {...this.player},
+                trainResults: {...this.trainResults}
+            });
+            this.$emit('closeModal');
+            this.resetData();
+            this.$toast.add({ severity: 'success', summary: 'Тренировки успешно обновлены', life: 3000 });
+        },
+        resetData() {
+            this.trainResults = null;
+        }
+    },
+    async mounted() {
+        if (this.player.trainResults !== null) {
+            this.trainResults = {...this.player.trainResults};
         }
     }
 }
 </script>
 
 <style scoped>
-.section-info {
-    display: flex;
-    column-gap: 1rem;
-}
-
-.section-info .avatar {
-    text-align: center;
-    margin-bottom: 0.5rem;
-}
-
-.section-info .title {
-    margin-bottom: 0.25rem;
-}
-
 .section-trains.data-form {
     grid-template-columns: 1fr 1fr 1fr;
-    gap: 1rem 5rem;
+    gap: 1rem 3rem;
 }
 </style>

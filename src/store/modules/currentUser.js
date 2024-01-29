@@ -43,8 +43,8 @@ export const currentUser = {
       commit('setEmail', user.email);
       commit('setIsAuthorized', true);
     },
-    async login({commit, dispatch}, {login, password}) {
-      await axios({
+    login({commit, dispatch}, {login, password}) {
+      return axios({
         method: 'post',
         url: '/auth/login',
         data: {
@@ -54,7 +54,7 @@ export const currentUser = {
         headers: {
           'Content-Type': 'application/json'
         }
-      }).then(async response => {
+      }).then(response => {
         localStorage.setItem('currentUser', JSON.stringify(response.data.user));
         localStorage.setItem('authToken', JSON.stringify(response.data.token));
         dispatch('setAxiosToken', response.data.token);

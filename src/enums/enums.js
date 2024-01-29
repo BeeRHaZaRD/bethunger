@@ -12,11 +12,25 @@ export const GAME_STATUS_SEVERITY = Object.freeze({
   'COMPLETED': 'danger'
 });
 
+export const PLANNED_EVENT_STATUS = Object.freeze({
+  'SCHEDULED': 'Запланировано',
+  'REQUESTED': 'Запрошено',
+  'STARTED': 'Запущено',
+  'CANCELLED': 'Отменено'
+});
+
+export const PLANNED_EVENT_STATUS_SEVERITY = Object.freeze({
+  'SCHEDULED': '',
+  'REQUESTED': 'warning',
+  'STARTED': 'success',
+  'COMPLETED': 'danger'
+});
+
 export const PLAYER_STATUS = Object.freeze({
-  'ALIVE': 'жив',
-  'SLIGHT_INJURY': 'легко ранен',
-  'MODERATE_INJURY': 'значительно ранен',
-  'SEVERE_INJURY': 'тяжело ранен',
+  'ALIVE': 'здоров',
+  'SLIGHT_INJURY': 'ранен',
+  'MODERATE_INJURY': 'ранен',
+  'SEVERE_INJURY': 'ранен',
   'DEAD': 'погиб'
 });
 
@@ -31,7 +45,23 @@ export const PLAYER_STATUS_SEVERITY = Object.freeze({
 export const INJURY_DEGREE = Object.freeze({
   'SLIGHT_INJURY': 'легкое',
   'MODERATE_INJURY': 'значительное',
-  'SEVERE_INJURY': 'тяжелое',
+  'SEVERE_INJURY': 'тяжелое'
+});
+
+export const SEX_NAME = Object.freeze({
+  'MALE': 'мужчина',
+  'FEMALE': 'женщина'
+});
+
+export const TRAIN_RESULTS_NAME = Object.freeze({
+  strength: 'Сила',
+  endurance: 'Выносливость',
+  agility: 'Ловкость',
+  stealth: 'Скрытность',
+  steelArms: 'Холодное оружие',
+  weapon: 'Стрелковое оружие',
+  archery: 'Стрельба из лука',
+  handToHand: 'Рукопашный бой'
 });
 
 export const SEX = Object.freeze({

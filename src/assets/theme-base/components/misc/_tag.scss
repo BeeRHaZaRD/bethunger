@@ -1,8 +1,8 @@
 @use 'sass:math';
 
 .p-tag {
-    background: $badgeBg;
-    color: $badgeTextColor;
+    background: $primaryBgColor;
+    color: $primaryColor;
     font-size: $badgeFontSize;
     font-weight: $badgeFontWeight;
     padding: $tagPadding;
@@ -14,9 +14,10 @@
         color: $successColor;
     }
 
+    // actually help color
     &.p-tag-info {
-        background-color: $infoBgColor;
-        color: $infoColor;
+        background-color: $helpBgColor;
+        color: $helpColor;
     }
 
     &.p-tag-warning {

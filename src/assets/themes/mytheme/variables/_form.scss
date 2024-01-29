@@ -309,11 +309,11 @@ $sliderHandleHeight: 1.143rem;
 
 /// Background of a slider handle
 /// @group form
-$sliderHandleBg: #ffffff;
+$sliderHandleBg: $bg-3;
 
 /// Border of a slider handle
 /// @group form
-$sliderHandleBorder: 2px solid $primaryColor;
+$sliderHandleBorder: 2px solid $bg-4;
 
 /// Border radius of a slider handle
 /// @group form
