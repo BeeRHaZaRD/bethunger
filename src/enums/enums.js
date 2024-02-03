@@ -23,7 +23,7 @@ export const PLANNED_EVENT_STATUS_SEVERITY = Object.freeze({
   'SCHEDULED': '',
   'REQUESTED': 'warning',
   'STARTED': 'success',
-  'COMPLETED': 'danger'
+  'CANCELLED': 'danger'
 });
 
 export const PLAYER_STATUS = Object.freeze({

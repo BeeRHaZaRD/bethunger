@@ -14,11 +14,15 @@
             </div>
             <div class="col-12 xl:col-6">
                 <div class="section-info mb-5">
-                    <h2>Информация об игре</h2>
+                    <div class="section-header">
+                        <div class="title">
+                            <h2>Информация об игре</h2>
+                        </div>
+                    </div>
                     <div class="data-form w-min">
                         <div class="field">
                             <label for="gameName">Название</label>
-                            <InputText id="gameName" v-model="game.name" type="text"/>
+                            <InputText id="gameName" v-model="game.name" type="text" :class="{'p-invalid': !game.name.trim()}"/>
                         </div>
                         <div class="field">
                             <label for="gameDescription">Описание</label>
@@ -36,16 +40,14 @@
                             <label for="dateStart">Время начала</label>
                             <Calendar v-model="game.dateStart" input-id="dateStart" showTime hourFormat="24" :min-date="new Date()" :panel-style="{width: '359px'}"/>
                         </div>
-                        <Button class="w-full mt-2" label="Сохранить" severity="success" @click="updateGameInfoWrapper"/>
+                        <Button class="w-full mt-2" label="Сохранить" severity="success" :disabled="!game.name.trim()" @click="updateGameInfoWrapper"/>
                     </div>
                 </div>
                 <div class="section-planned-events mb-5">
-                    <h2>Запланированные события</h2>
-                    <PlannedEventList :planned-events="plannedEvents" :event-types="eventTypes"/>
+                    <PlannedEventList :planned-events="plannedEvents" :event-types="eventTypes" title="Запланированные события"/>
                 </div>
                 <div class="section-items">
-                    <h2>Предметы</h2>
-                    <ItemList :items="items"/>
+                    <ItemList :items="items" title="Предметы"/>
                 </div>
             </div>
             <div class="col-12 xl:col-6">
@@ -101,7 +103,8 @@ export default {
     },
     methods: {
         ...mapMutations({
-            setIsEditMode: 'game/setIsEditMode'
+            setIsEditMode: 'game/setIsEditMode',
+            resetGame: 'game/resetGame'
         }),
         ...mapActions({
             fetchGame: 'game/fetchGame',
@@ -133,6 +136,10 @@ export default {
             this.setIsEditMode(true);
             this.isDataLoaded = true;
         }
+    },
+    beforeUnmount() {
+        // for the watcher to work correctly
+        this.resetGame();
     }
 }
 </script>

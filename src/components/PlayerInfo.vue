@@ -9,11 +9,10 @@
             </div>
             <div class="info-text">
                 <h2 class="title">{{player.fullName}}</h2>
-                <h4 class="title-description mb-2">
+                <h4 class="title-description">
                     <span>{{SEX_NAME[player.sex]}},&nbsp;</span>
                     <span>{{player.district}}-й дистрикт</span>
                 </h4>
-                <p class="description">{{player.description}}</p>
             </div>
             <div class="buttons">
                 <!-- TODO -->
@@ -35,12 +34,11 @@
             </div>
         </div>
         <div class="section-items">
-            <h2>Полученные предметы</h2>
-            <ItemList :items="[]"/>
+            <!-- TODO received items -->
+            <ItemList :items="[]" title="Полученные предметы"/>
         </div>
         <div class="section-events">
-            <h2>Связанные события</h2>
-            <HappenedEventList :events="happenedEvents"/>
+            <HappenedEventList :events="happenedEvents" title="Связанные события"/>
         </div>
     </div>
 </template>

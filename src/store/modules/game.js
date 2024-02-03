@@ -1,13 +1,12 @@
 import axios from "@/axios";
-import {dateTimeToString, dateTimeToIso} from "@/util"
+import {dateTimeToString, dateTimeToIso, makeFullName} from "@/utils/util"
 import moment from "moment";
 
 export const game = {
   namespaced: true,
   state: () => ({
-    publishRequiredFields: [],
     isEditMode: false,
-    id: 0,
+    id: null,
     name: null,
     description: null,
     arenaType: null,
@@ -26,31 +25,62 @@ export const game = {
   getters: {
     playersLeft: state => Object.values(state.players).flat()
         .filter(player => player !== null && player.status !== 'DEAD')
+        .length,
+    playersNum: state => Object.values(state.players).flat()
+        .filter(player => player !== null)
         .length
   },
   mutations: {
     setGame(state, game) {
-      if (game.status === 'draft') {
-        state.publishRequiredFields = ['dateStart', 'arenaType', 'arenaDescription', 'description'];
-      }
-      state.id = game.id;
-      state.name = game.name;
-      state.description = game.description;
-      state.arenaType = game.arenaType;
-      state.arenaDescription = game.arenaDescription;
+      state.id = game.id || null;
+      state.name = game.name || null;
+      state.description = game.description || null;
+      state.arenaType = game.arenaType || null;
+      state.arenaDescription = game.arenaDescription || null;
       state.dateStart = game.dateStart ? new Date(game.dateStart) : null;
-      state.duration = game.duration;
-      state.status = game.status;
-      state.manager = game.manager;
+      state.duration = game.duration || null;
+      state.status = game.status || null;
+      state.manager = game.manager || null;
       state.winner = game.winner || null;
+      if (game.winner) {
+        state.winner.fullName = makeFullName(game.winner);
+      }
       state.eventTypes = game.eventTypes;
       state.happenedEvents = game.happenedEvents;
       state.plannedEvents = game.plannedEvents;
       state.items = game.items;
+      for (const district in game.players) {
+        for (const player of game.players[district]) {
+          if (player) {
+            player.fullName = makeFullName(player);
+          }
+        }
+      }
       state.players = game.players;
+
+    },
+    resetGame(state) {
+      state.id = null;
+      state.name = null;
+      state.description = null;
+      state.arenaType = null;
+      state.arenaDescription = null;
+      state.dateStart = null;
+      state.duration = null;
+      state.status = null;
+      state.manager = {};
+      state.winner = {};
+      state.eventTypes = [];
+      state.happenedEvents = [];
+      state.plannedEvents = [];
+      state.items = [];
+      state.players = []
     },
     setIsEditMode(state, isEditMode){
       state.isEditMode = isEditMode;
+    },
+    setStatus(state, status) {
+      state.status = status;
     },
     addHappenedEvent(state, happenedEvent) {
       state.happenedEvents.unshift(happenedEvent);
@@ -150,10 +180,16 @@ export const game = {
       return axios({
         method: 'post',
         url: '/games/' + gameId + '/publish'
-      }).then(response => {
-        commit('setGame', response.data);
-      }).catch(e => {
-        console.log(e);
+      }).then(() => {
+        commit('setStatus', 'PLANNED');
+      });
+    },
+    startGame({commit}, gameId) {
+      return axios({
+        method: 'post',
+        url: '/games/' + gameId + '/start'
+      }).then(() => {
+        commit('setStatus', 'ONGOING');
       });
     },
     getAllItems() {
@@ -192,7 +228,10 @@ export const game = {
         url: '/players/available',
         params: {district, sex}
       }).then(response => {
-        return response.data;
+        return response.data.map(player => {
+          player.fullName = makeFullName(player);
+          return player;
+        });
       }).catch(e => {
         console.log(e);
       });
@@ -202,7 +241,9 @@ export const game = {
         method: 'post',
         url: '/games/' + gameId + '/players/' + player.id,
       }).then((response) => {
-        commit('addPlayer', response.data);
+        const player = response.data;
+        player.fullName = makeFullName(player);
+        commit('addPlayer', player);
       }).catch(e => {
         console.log(e);
       });
@@ -238,8 +279,17 @@ export const game = {
         }
       }).then((response) => {
         commit('addPlannedEvent', response.data);
-      }).catch(e => {
-        console.log(e);
+      });
+    },
+    runPlannedEvent({commit}, {gameId, eventTypeId}) {
+      return axios({
+        method: 'post',
+        url: '/games/' + gameId + '/plannedEvents',
+        data: {
+          eventTypeId: eventTypeId
+        }
+      }).then((response) => {
+        commit('addPlannedEvent', response.data);
       });
     },
     removePlannedEvent({commit}, {gameId, plannedEvent}) {
@@ -252,7 +302,7 @@ export const game = {
         console.log(e);
       });
     },
-    fetchHappenedEvents({commit}, {gameId, after}) {
+    fetchHappenedEvents({getters, commit}, {gameId, after}) {
       return axios({
         method: 'get',
         url: '/games/' + gameId + '/happenedEvents',
@@ -268,6 +318,9 @@ export const game = {
           switch (event.type) {
             case 'PLAYER':
               commit('setPlayerStatus', {player: event.player, status: event.player.status});
+              if (getters.playersLeft === 1) {
+                commit('setStatus', 'COMPLETED');
+              }
               break;
             case 'PLANNED_EVENT':
               commit('setPlannedEventStatus', {plannedEvent: event.plannedEvent, status: event.plannedEvent.status});

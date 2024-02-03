@@ -12,7 +12,6 @@
                     <span>{{SEX_NAME[player.sex]}},&nbsp;</span>
                     <span>{{player.district}}-й дистрикт</span>
                 </h4>
-                <p class="description">{{player.description}}</p>
             </div>
         </div>
         <div class="section-trains data-form mb-4">

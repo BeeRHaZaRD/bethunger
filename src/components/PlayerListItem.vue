@@ -6,6 +6,10 @@
         </div>
         <div class="player-data">
             <div class="name">{{player.fullName}}</div>
+            <template v-if="isEditMode">
+                <Badge v-if="player.trainResults" value="тренировки"/>
+                <Badge v-else value="тренировки" severity="danger"/>
+            </template>
             <template v-if="gameStatus === 'ONGOING'">
                 <div class="buttons" v-if="player.status !== 'DEAD'">
                     <Button label="Ставка x1.5" severity="info" @click.stop="$refs.opMakeBet.toggle($event)"/>
@@ -99,11 +103,11 @@ export default {
 
 .status-badge {
     position: absolute;
-    top: 24px;
-    right: -2px;
-    width: 20px;
-    height: 20px;
-    border: 2px solid var(--bg-2);
+    bottom: -2px;
+    right: 0;
+    width: 16px;
+    height: 16px;
+    outline: 2px solid var(--bg-2);
 }
 
 .player .btn-remove {

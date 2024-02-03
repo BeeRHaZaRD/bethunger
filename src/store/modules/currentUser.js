@@ -4,71 +4,62 @@ import router from "@/router";
 export const currentUser = {
   namespaced: true,
   state: () => ({
-    role: '',
-    login: '',
-    firstName: '',
-    lastName: '',
-    email: '',
+    id: null,
+    username: null,
+    firstName: null,
+    lastName: null,
+    role: null,
     isAuthorized: false
   }),
   getters: {
     fullName: state => state.firstName + ' ' + state.lastName
   },
   mutations: {
+    setUser(state, user) {
+      state.id = user.id;
+      state.username = user.username;
+      state.firstName = user.firstName
+      state.lastName = user.lastName;
+      state.role = user.role;
+      state.isAuthorized = true;
+    },
+    resetUser(state) {
+      state.id = null;
+      state.username = null;
+      state.firstName = null
+      state.lastName = null;
+      state.role = null;
+      state.isAuthorized = false;
+    },
     setIsAuthorized(state, isAuthorized) {
       state.isAuthorized = isAuthorized;
-    },
-    setRole(state, role) {
-      state.role = role;
-    },
-    setLogin(state, login) {
-      state.login = login;
-    },
-    setFirstName(state, firstName) {
-      state.firstName = firstName;
-    },
-    setLastName(state, lastName) {
-      state.lastName = lastName;
-    },
-    setEmail(state, email) {
-      state.email = email;
     }
   },
   actions: {
-    setUser({commit}, user) {
-      commit('setRole', user.role);
-      commit('setLogin', user.login);
-      commit('setFirstName', user.firstName);
-      commit('setLastName', user.lastName);
-      commit('setEmail', user.email);
-      commit('setIsAuthorized', true);
-    },
-    login({commit, dispatch}, {login, password}) {
+    login({commit, dispatch}, {username, password}) {
       return axios({
         method: 'post',
         url: '/auth/login',
         data: {
-          login: login,
+          username: username,
           password: password
         },
         headers: {
           'Content-Type': 'application/json'
         }
       }).then(response => {
-        localStorage.setItem('currentUser', JSON.stringify(response.data.user));
         localStorage.setItem('authToken', JSON.stringify(response.data.token));
+        localStorage.setItem('currentUser', JSON.stringify(response.data.user));
         dispatch('setAxiosToken', response.data.token);
-        dispatch('setUser', response.data.user);
-      }).catch(e => {
-        console.log(e);
+        commit('setUser', response.data.user);
       });
     },
     logout({commit, dispatch}) {
       localStorage.removeItem('currentUser');
       localStorage.removeItem('authToken');
       dispatch('clearAxiosToken');
-      commit('setIsAuthorized', false);
-      router.push('/auth');
+      commit('resetUser');
+      router.push('/auth/login');
     },
     setAxiosToken(_, authToken) {
       axios.defaults.headers.common['Authorization'] = 'Bearer ' + authToken;

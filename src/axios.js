@@ -13,6 +13,8 @@ axiosInstance.interceptors.response.use(
     (error) => {
       if (error.response?.status === 401) {
         store.dispatch('currentUser/logout');
+      } else if (error.response?.status === 403) {
+        console.log("Error 403")
       }
 
       return Promise.reject(error);

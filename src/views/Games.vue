@@ -39,11 +39,12 @@
             </div>
             <div class="field p-fluid">
                 <label for="gameManager">Распорядитель</label>
-                <AutoComplete v-model="newGame.manager" input-id="gameManager" dropdown :suggestions="suggestedManagers" optionLabel="fullName" @complete="searchManager"/>
+                <AutoComplete v-model="newGame.manager" input-id="gameManager" dropdown :suggestions="suggestedManagers" optionLabel="fullName" @complete="searchManager"
+                              :disabled="availableManagers.length === 0" :placeholder="availableManagers.length === 0 ? 'Нет доступных менеджеров' : ''"/>
             </div>
         </div>
         <template #footer>
-            <Button label="Создать игру" severity="success" :disabled="!newGame.name || !newGame.manager?.id" @click="createGameWrapper"/>
+            <Button label="Создать игру" severity="success" :disabled="!newGame.name.trim() || !newGame.manager?.id" @click="createGameWrapper"/>
         </template>
     </Dialog>
 </template>
@@ -59,10 +60,11 @@ export default {
             GAME_STATUS: GAME_STATUS,
             GAME_STATUS_SEVERITY: GAME_STATUS_SEVERITY,
             modalVisible: false,
-            availableManagers: null,
-            suggestedManagers: null,
+            isAvailableManagersLoaded: false,
+            availableManagers: [],
+            suggestedManagers: [],
             newGame: {
-                name: null,
+                name: '',
                 manager: null
             }
         }
@@ -77,10 +79,11 @@ export default {
             this.$router.push(`/games/${event.data.id}`)
         },
         async openModal() {
-            this.modalVisible = true;
-            if (this.availableManagers === null) {
+            if (!this.isAvailableManagersLoaded) {
                 this.availableManagers = await this.getAllManagers();
+                this.isAvailableManagersLoaded = true;
             }
+            this.modalVisible = true;
         },
         searchManager(event) {
             this.suggestedManagers = event.query
@@ -95,8 +98,9 @@ export default {
             this.$toast.add({ severity: 'success', summary: 'Игра успешно создана', life: 3000 });
         },
         resetData() {
-            this.newGame.name = null;
+            this.newGame.name = '';
             this.newGame.manager = null;
+            this.suggestedManagers = [];
         }
     },
     async mounted() {

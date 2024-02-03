@@ -14,6 +14,7 @@
                     </div>
                     <Button :label="userFullName" @click="toggleUserMenu" text icon="pi pi-user"/>
                     <Menu ref="userMenu" :model="userMenuItems" :popup="true"/>
+                    <Button label="Выйти" @click="logoutWrapper" icon="pi pi-sign-out"/>
                 </div>
             </div>
         </div>
@@ -57,7 +58,7 @@ export default {
                 {
                     label: 'Выход',
                     icon: 'pi pi-fw pi-sign-out',
-                    command: this.logout
+                    command: this.logoutWrapper
                 },
             ]
         }
@@ -73,11 +74,10 @@ export default {
     },
     methods: {
         ...mapMutations({
-            setIsAuthorized: 'currentUser/setIsAuthorized'
+            setUser: 'currentUser/setUser'
         }),
         ...mapActions({
             fetchBalance: 'account/fetchBalance',
-            setUser: 'currentUser/setUser',
             setAxiosToken: 'currentUser/setAxiosToken',
             logout: 'currentUser/logout'
         }),
@@ -86,6 +86,9 @@ export default {
         },
         toggleUserMenu(event) {
             this.$refs.userMenu.toggle(event);
+        },
+        logoutWrapper() {
+            this.logout();
         }
     },
     created() {
@@ -106,6 +109,10 @@ export default {
 
 .first-lower::first-letter {
     text-transform: lowercase;
+}
+
+.monospaced {
+    font-variant-numeric: tabular-nums;
 }
 
 .topbar-wrapper {
@@ -226,9 +233,16 @@ export default {
     z-index: 100;
 }
 
-.content-header {
+.content-header,
+.section-header {
     display: flex;
     justify-content: space-between;
+    align-items: center;
+}
+
+.content-header .title h1,
+.section-header .title h2 {
+    margin-bottom: 0;
 }
 
 .content-header .title {
@@ -236,6 +250,14 @@ export default {
     height: fit-content;
     align-items: center;
     column-gap: 1rem;
+}
+
+.section-header {
+    margin-bottom: 1rem;
+}
+
+.section-header:has(.controls) {
+    margin-bottom: 0.75rem;
 }
 
 .card {
@@ -319,10 +341,10 @@ export default {
 }
 /* Large */
 @media screen and (min-width: 992px) {
+
 }
 /* X-large */
 @media screen and (min-width: 1200px) {
 
 }
-
 </style>

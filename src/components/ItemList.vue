@@ -1,4 +1,10 @@
 <template>
+    <div class="section-header">
+        <div class="title">
+            <h2>{{title}}</h2>
+        </div>
+    </div>
+
     <div v-if="items.length > 0" class="items">
         <template v-for="item in items" :key="item.id">
             <ItemListItem :item="item" @remove="removeItemWrapper"/>
@@ -7,17 +13,19 @@
     <div v-else class="card">
         <p class="text-center p-text-secondary">Нет предметов</p>
     </div>
+
     <Button v-if="isEditMode" class="mt-3" label="ДОБАВИТЬ" icon="pi pi-plus" severity="secondary" text @click="openModal"/>
 
-    <Dialog v-model:visible="modalVisible" modal :show-header="false" :dismissableMask="true" :style="{width: '900px'}">
+    <Dialog v-model:visible="modalVisible" modal :show-header="false" :dismissableMask="true" :style="{width: '400px'}">
         <h2>Новый предмет</h2>
-        <div class="data-form mb-2">
+        <div class="data-form">
             <div class="field p-fluid">
                 <label for="item">Предмет</label>
-                <AutoComplete v-model="item" input-id="item" dropdown :suggestions="suggestedItems" optionLabel="name" @complete="searchItem"/>
+                <AutoComplete v-model="item" input-id="item" dropdown :suggestions="suggestedItems" optionLabel="name" @complete="searchItem"
+                              :disabled="availableItems.length === 0" :placeholder="availableItems.length === 0 ? 'Нет доступных предметов' : ''"/>
             </div>
         </div>
-        <div class="data-list">
+        <div v-if="availableItems.length > 0" class="data-list mt-3">
             <div class="key">Название:</div>
             <div v-if="item && item.id" class="value">{{item.name}}</div>
             <div v-else class="value">-</div>
@@ -46,12 +54,17 @@ export default defineComponent({
     data() {
         return {
             modalVisible: false,
-            availableItems: null,
-            suggestedItems: null,
+            isAvailableItemsLoaded: false,
+            availableItems: [],
+            suggestedItems: [],
             item: null
         }
     },
     props: {
+        title: {
+            type: String,
+            required: true
+        },
         items: {
             type: Array,
             required: true
@@ -69,10 +82,11 @@ export default defineComponent({
             removeItem: 'game/removeItem'
         }),
         async openModal() {
-            this.modalVisible = true;
-            if (this.availableItems === null) {
+            if (this.isAvailableItemsLoaded === false) {
                 this.availableItems = await this.getAllItems();
+                this.isAvailableItemsLoaded = true;
             }
+            this.modalVisible = true;
         },
         searchItem(event) {
             let availableItems = [...this.availableItems];
@@ -100,12 +114,18 @@ export default defineComponent({
         },
         resetData() {
             this.item = null;
+            this.availableItems = [];
+            this.suggestedItems = [];
         }
     }
 })
 </script>
 
 <style scoped>
+.data-form {
+    grid-template-columns: auto;
+}
+
 .data-list {
     grid-template-columns: auto;
 }

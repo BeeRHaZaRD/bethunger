@@ -69,8 +69,12 @@ export default defineComponent({
     background-color: var(--primary-color);
 }
 
+.planned-event:first-child::before {
+    top: 50%;
+}
+
 .planned-event:last-child::before {
-    bottom: 0;
+    bottom: 50%;
 }
 
 .planned-event::after {

@@ -10,15 +10,15 @@
                     <div class="controls">
                         <template v-if="status === 'DRAFT' || status === 'PLANNED'">
                             <Button class="hidden md:inline-flex" icon="pi pi-file-edit" label="Редактировать" outlined @click="$router.push($route.path + '/edit')"/>
-                            <Button class="md:hidden" icon="pi pi-file-edit" outlined/>
+                            <Button class="md:hidden" icon="pi pi-file-edit" outlined @click="$router.push($route.path + '/edit')"/>
                         </template>
                         <template v-if="status === 'DRAFT'">
-                            <Button class="hidden md:inline-flex" icon="pi pi-check" label="Опубликовать" @click="checkValidity"/>
-                            <Button class="md:hidden" icon="pi pi-check" @click="checkValidity"/>
+                            <Button class="hidden md:inline-flex" icon="pi pi-check" label="Опубликовать" @click="confirmPublish"/>
+                            <Button class="md:hidden" icon="pi pi-check" @click="confirmPublish"/>
                         </template>
                         <template v-else-if="status === 'PLANNED'">
-                            <Button class="hidden md:inline-flex" icon="pi pi-play" label="Начать"/>
-                            <Button class="md:hidden" icon="pi pi-play"/>
+                            <Button class="hidden md:inline-flex" icon="pi pi-play" label="Начать" @click="confirmStart"/>
+                            <Button class="md:hidden" icon="pi pi-play" @click="confirmStart"/>
                         </template>
                     </div>
                 </div>
@@ -27,16 +27,20 @@
                 <div class="section-time mb-5" v-if="status === 'ONGOING' || status === 'COMPLETED'">
                     <div class="time-panel">
                         <i class="pi pi-clock"></i>
-                        <div class="time-passed">
+                        <div class="time-passed monospaced">
                             <span v-if="status === 'ONGOING'">{{timeLeft}}</span>
                             <span v-else>{{durationString}}</span>
                         </div>
                     </div>
                 </div>
                 <div class="section-info mb-5">
-                    <h2>Об игре</h2>
+                    <div class="section-header">
+                        <div class="title">
+                            <h2>Об игре</h2>
+                        </div>
+                    </div>
                     <div class="card">
-                        <div v-if="status === 'DRAFT'" class="data-list">
+                        <div class="data-list">
                             <div class="key">Распорядитель:</div>
                             <div v-if="manager" class="value">{{manager.firstName}} {{manager.lastName}}</div>
                             <div v-else class="value p-text-secondary">Пусто</div>
@@ -56,28 +60,7 @@
                             <div class="key">Описание турнира:</div>
                             <div v-if="description" class="value">{{description}}</div>
                             <div v-else class="value p-text-secondary">Пусто</div>
-                        </div>
-                        <div v-else class="data-list">
-                            <template v-if="manager">
-                                <div class="key">Распорядитель:</div>
-                                <div class="value">{{manager.firstName}} {{manager.lastName}}</div>
-                            </template>
-                            <template v-if="dateStart">
-                                <div class="key">Начало:</div>
-                                <div class="value">{{dateStartString}}</div>
-                            </template>
-                            <template v-if="arenaType">
-                                <div class="key">Тип арены:</div>
-                                <div class="value">{{arenaType}}</div>
-                            </template>
-                            <template v-if="arenaDescription">
-                                <div class="key">Описание арены:</div>
-                                <div class="value">{{arenaDescription}}</div>
-                            </template>
-                            <template v-if="description">
-                                <div class="key">Описание турнира:</div>
-                                <div class="value">{{description}}</div>
-                            </template>
+
                             <template v-if="winner">
                                 <div class="key">Победитель:</div>
                                 <div class="value">{{winner.fullName}}</div>
@@ -85,17 +68,14 @@
                         </div>
                     </div>
                 </div>
-                <div class="section-events mb-5">
-                    <h2>Ход игры</h2>
-                    <HappenedEventList :events="happenedEvents"/>
-                </div>
                 <div class="section-planned-events mb-5">
-                    <h2>Планировка событий</h2>
-                    <PlannedEventList :planned-events="plannedEvents" :event-types="eventTypes"/>
+                    <PlannedEventList :planned-events="plannedEvents" :event-types="eventTypes" title="Планировка событий"/>
                 </div>
-                <div class="section-items">
-                    <h2>Предметы</h2>
-                    <ItemList :items="items"/>
+                <div class="section-items mb-5" v-if="status === 'DRAFT' || status === 'PLANNED'">
+                    <ItemList :items="items" title="Предметы"/>
+                </div>
+                <div class="section-events" v-if="status === 'ONGOING' || status === 'COMPLETED'">
+                    <HappenedEventList :events="happenedEvents" title="Ход игры"/>
                 </div>
             </div>
             <div class="col-12 xl:col-6">
@@ -106,7 +86,14 @@
             <p>Внимание: публикация игры приведет к тому, что она станет доступна всем пользователям. Отменить данное действие невозможно!</p>
             <template #footer>
                 <Button label="Опубликовать" severity="success" @click="publishGameWrapper"/>
-                <Button label="Отмена" class="bg-2" @click="modalPublishVisible = false" text/>
+                <Button label="Отмена" severity="secondary" text class="bg-2" @click="modalPublishVisible = false"/>
+            </template>
+        </Dialog>
+        <Dialog v-model:visible="modalStartVisible" modal header="Вы действительно хотите запутить эту игру?" :style="{width: '600px'}">
+            <p>Внимание: убедитесь, что все готово для запуска игры. Отменить данное действие невозможно!</p>
+            <template #footer>
+                <Button label="Запустить" severity="success" @click="startGameWrapper"/>
+                <Button label="Отмена" severity="secondary" text class="bg-2" @click="modalStartVisible = false"/>
             </template>
         </Dialog>
         <OverlayPanel ref="opMakeBet">
@@ -123,14 +110,15 @@
 </template>
 
 <script>
-import {mapActions, mapMutations, mapState} from "vuex";
+import {mapActions, mapGetters, mapMutations, mapState} from "vuex";
 import {GAME_STATUS, GAME_STATUS_SEVERITY} from "@/enums/enums";
 import PlayerList from "@/components/PlayerList.vue";
 import PlayerInfo from "@/components/PlayerInfo.vue";
 import ItemList from "@/components/ItemList.vue";
 import HappenedEventList from "@/components/HappenedEventList.vue";
 import PlannedEventList from "@/components/PlannedEventList.vue";
-import {dateTimeToString, formatTimer} from "@/util";
+import {dateTimeToIso, dateTimeToString, formatTimer} from "@/utils/util";
+import {isGameInfoValid, isPlayersTrainResultsFull} from "@/utils/validations";
 import {useStopwatch} from 'vue-timer-hook';
 import moment from "moment/moment";
 
@@ -143,12 +131,13 @@ export default {
             isDataLoaded: false,
             betSum: null,
             modalPublishVisible: false,
-            eventPollingId: null
+            modalStartVisible: false,
+            eventPollingId: null,
+            timer: null
         }
     },
     computed: {
         ...mapState({
-            publishRequiredFields: state => state.game.publishRequiredFields,
             id: state => state.game.id,
             name: state => state.game.name,
             arenaType: state => state.game.arenaType,
@@ -165,6 +154,9 @@ export default {
             players: state => state.game.players,
             items: state => state.game.items
         }),
+        ...mapGetters({
+            playersNum: 'game/playersNum'
+        }),
         dateStartString() {
             return dateTimeToString(this.dateStart);
         },
@@ -173,30 +165,69 @@ export default {
             return formatTimer(duration.days(), duration.hours(), duration.minutes(), duration.seconds());
         },
         timeLeft() {
-            const timer = useStopwatch(Math.round((new Date() - this.dateStart) / 1000), true);
-            return formatTimer(timer.days.value, timer.hours.value, timer.minutes.value, timer.seconds.value);
+            const timer = this.timer;
+            return formatTimer(timer.days, timer.hours, timer.minutes, timer.seconds);
         },
+    },
+    watch: {
+        status(newStatus, oldStatus) {
+            if (oldStatus !== null && newStatus !== null) {
+                this.$router.go(0);
+            }
+        }
     },
     methods: {
         ...mapMutations({
-            setIsEditMode: 'game/setIsEditMode'
+            setIsEditMode: 'game/setIsEditMode',
+            resetGame: 'game/resetGame'
         }),
         ...mapActions({
             fetchGame: 'game/fetchGame',
             fetchHappenedEvents: 'game/fetchHappenedEvents',
-            publishGame: 'game/publishGame'
+            publishGame: 'game/publishGame',
+            startGame: 'game/startGame'
         }),
-        checkValidity() {
-            if (this.publishRequiredFields.every(field => this[field] !== null)) {
-                this.modalPublishVisible = true;
-            } else {
-                this.$toast.add({ severity: 'error', summary: 'Ошибка публикации', detail: 'Данные об игре не заполнены', life: 3000 });
+        confirmPublish() {
+            if (!isGameInfoValid({name: this.name, description: this.description, arenaType: this.arenaType, arenaDescription: this.arenaDescription, dateStart: this.dateStart})) {
+                this.$toast.add({ severity: 'error', summary: 'Ошибка публикации игры', detail: 'Информация об игре не заполнена', life: 3000 });
+                return;
             }
+            if (this.playersNum !== 24) {
+                this.$toast.add({ severity: 'error', summary: 'Ошибка публикации игры', detail: 'Не все игроки добавлены', life: 3000 });
+                return;
+            }
+            this.modalPublishVisible = true;
         },
         async publishGameWrapper() {
             this.modalPublishVisible = false;
-            await this.publishGame(this.$route.params.id);
-            this.$toast.add({ severity: 'success', summary: 'Игра успешно опубликована', life: 3000 });
+            try {
+                await this.publishGame(this.$route.params.id);
+                // TODO fix toast
+                this.$toast.add({ severity: 'success', summary: 'Игра успешно опубликована', life: 3000 });
+            } catch (e) {
+                this.$toast.add({ severity: 'error', summary: 'Ошибка публикации игры', detail: e.response.data, life: 3000 });
+            }
+        },
+        confirmStart() {
+            if (!isPlayersTrainResultsFull(this.players)) {
+                this.$toast.add({ severity: 'error', summary: 'Ошибка запуска игры', detail: 'Не у всех игроков заполнены результаты тренировок', life: 3000 });
+                return;
+            }
+            if (this.dateStart > new Date()) {
+                this.$toast.add({ severity: 'error', summary: 'Ошибка запуска игры', detail: 'Дата начала игры еще не наступила', life: 3000 });
+                return;
+            }
+            this.modalStartVisible = true;
+        },
+        async startGameWrapper() {
+            this.modalStartVisible = false;
+            try {
+                await this.startGame(this.$route.params.id);
+                // TODO fix toast
+                this.$toast.add({ severity: 'success', summary: 'Игра успешно запущена', life: 3000 });
+            } catch (e) {
+                this.$toast.add({ severity: 'error', summary: 'Ошибка запуска игры', detail: e.response.data, life: 3000 });
+            }
         },
         pollEvents() {
             if (this.status !== 'ONGOING')
@@ -204,7 +235,7 @@ export default {
             this.eventPollingId = setInterval(() => {
                 this.fetchHappenedEvents({
                     gameId: this.$route.params.id,
-                    after: this.happenedEvents[0].happenedAt
+                    after: this.happenedEvents.length > 0 ? this.happenedEvents[0].happenedAt : dateTimeToIso(this.dateStart)
                 })
             }, 10000);
         }
@@ -212,10 +243,12 @@ export default {
     async mounted() {
         await this.fetchGame(this.$route.params.id);
         this.setIsEditMode(false);
-
         this.isDataLoaded = true;
 
-        // TODO watcher on status to start/stop polling
+        if (this.status === 'ONGOING') {
+            this.timer = useStopwatch(Math.round((new Date() - this.dateStart) / 1000), true);
+        }
+
         // this.pollEvents();
     },
     beforeUnmount() {
@@ -223,6 +256,8 @@ export default {
             clearInterval(this.eventPollingId);
             this.eventPollingId = null;
         }
+        // for the watcher to work correctly
+        this.resetGame();
     }
 }
 </script>
@@ -250,7 +285,6 @@ export default {
 
 .time-panel .time-passed {
     font-size: 3rem;
-    font-variant-numeric: tabular-nums;
 }
 
 .section-info .data-list {

@@ -1,4 +1,10 @@
 <template>
+    <div class="section-header">
+        <div class="title">
+            <h2>{{title}}</h2>
+        </div>
+    </div>
+
     <div class="card">
         <div v-if="events.length !== 0" class="data-list">
             <template v-for="event in events" :key="event.id">
@@ -17,6 +23,10 @@ export default defineComponent({
     name: "HappenedEventList",
     components: { HappenedEventListItem },
     props: {
+        title: {
+            type: String,
+            required: true
+        },
         events: {
             type: Array,
             required: true

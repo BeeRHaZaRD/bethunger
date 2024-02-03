@@ -9,25 +9,25 @@ import Auth from "@/views/Auth.vue";
 
 const routes = [
     {
-        path: "/auth",
+        path: '/auth/login',
         component: Auth
     },
+    // {
+    //     path: '/:pathMatch(.*)*',
+    //     component: Games,
+    //     meta: {
+    //         requireAuth: true
+    //     }
+    // },
     {
-        path: "/:pathMatch(.*)*",
+        path: '/games',
         component: Games,
         meta: {
             requireAuth: true
         }
     },
     {
-        path: "/account",
-        component: Account,
-        meta: {
-            requireAuth: true
-        }
-    },
-    {
-        path: "/games/:id",
+        path: '/games/:id',
         component: Game,
         meta: {
             requireAuth: true
@@ -41,7 +41,14 @@ const routes = [
         }
     },
     {
-        path: "/admin",
+        path: '/account',
+        component: Account,
+        meta: {
+            requireAuth: true
+        }
+    },
+    {
+        path: '/admin',
         component: AdminPanel,
         meta: {
             requireAuth: true
@@ -54,20 +61,20 @@ const router = createRouter({
     routes
 })
 
-// router.beforeEach((to, from, next) => {
-//     const currentUser = JSON.parse(localStorage.getItem('currentUser'));
-//     const requireAuth = to.matched.some(record => record.meta.requireAuth);
-//
-//     if (requireAuth && !currentUser) {
-//         next('/auth');
-//         return;
-//     }
-//
-//     if (to.path === '/auth' && currentUser) {
-//         next('/games');
-//     } else {
-//         next();
-//     }
-// });
+router.beforeEach((to, from, next) => {
+    const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+    const requireAuth = to.matched.some(record => record.meta.requireAuth);
+
+    if (requireAuth && !currentUser) {
+        next('/auth/login');
+        return;
+    }
+
+    if (to.path === '/auth/login' && currentUser) {
+        next('/games');
+    } else {
+        next();
+    }
+});
 
 export default router;

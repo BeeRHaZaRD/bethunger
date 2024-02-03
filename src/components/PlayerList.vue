@@ -15,27 +15,28 @@
                 <PlayerListItem v-if="player" :player="player" :game-status="gameStatus" @select-player="openModal(player)" @remove-player="removePlayerWrapper"/>
                 <Button v-else-if="isEditMode" class="add-player" label="ДОБАВИТЬ" severity="secondary" @click="openOverlay($event, parseInt(district), sexNum)"/>
                 <div v-else class="empty p-text-secondary">Нет игрока</div>
+
+                <!-- Добавление игрока -->
+                <OverlayPanel ref="selectPlayerOp">
+                    <div class="field p-fluid mb-1">
+                        <label for="player">Игрок</label>
+                        <AutoComplete ref="selectPlayerAc" v-model="playerToAdd" input-id="player" dropdown :suggestions="suggestedPlayers" optionLabel="fullName" @complete="searchPlayer" @item-select="addPlayerWrapper"
+                                      :disabled="availablePlayers.length === 0" :placeholder="availablePlayers.length === 0 ? 'Нет доступных игроков' : ''"/>
+                    </div>
+                </OverlayPanel>
             </template>
         </template>
     </div>
 
     <!-- Подробная информация об игроке -->
-    <Dialog v-if="player" v-model:visible="modalPlayerVisible" modal :showHeader="false" :dismissableMask="true" :style="{width: '1100px'}">
-        <PlayerInfo :player="player"/>
+    <Dialog v-model:visible="modalPlayerVisible" modal :showHeader="false" :dismissableMask="true" :style="{width: '1100px'}" @hide="currentPlayer = null">
+        <PlayerInfo :player="currentPlayer"/>
     </Dialog>
 
     <!-- Изменение результатов тренировок -->
-    <Dialog v-if="player" v-model:visible="modalTrainsEditVisible" modal header="Результаты тренировок" :dismissableMask="true" :draggable="false">
-        <PlayerTrainsEdit :player="player" @close-modal="this.modalTrainsEditVisible = false"/>
+    <Dialog v-model:visible="modalTrainsEditVisible" modal header="Результаты тренировок" :dismissableMask="true" :draggable="false" @hide="currentPlayer = null">
+        <PlayerTrainsEdit :player="currentPlayer" @close-modal="this.modalTrainsEditVisible = false"/>
     </Dialog>
-
-    <!-- Добавление игрока -->
-    <OverlayPanel ref="selectPlayerOp">
-        <div class="field p-fluid mb-3">
-            <label for="player">Игрок</label>
-            <AutoComplete v-model="player" input-id="player" dropdown :suggestions="suggestedPlayers" optionLabel="fullName" @complete="searchPlayer" @item-select="addPlayerWrapper"/>
-        </div>
-    </OverlayPanel>
 </template>
 
 <script>
@@ -45,6 +46,7 @@ import {SEX} from "@/enums/enums"
 import PlayerInfo from "@/components/PlayerInfo.vue";
 import PlayerListItem from "@/components/PlayerListItem.vue";
 import PlayerTrainsEdit from "@/components/PlayerTrainsEdit.vue";
+import {getPlayerIndex, openAutoCompleteDropdown} from "@/utils/util";
 
 export default defineComponent({
     name: "PlayerList",
@@ -53,9 +55,11 @@ export default defineComponent({
         return {
             modalPlayerVisible: false,
             modalTrainsEditVisible: false,
-            availablePlayers: null,
-            suggestedPlayers: null,
-            player: null
+            availablePlayers: [],
+            suggestedPlayers: [],
+            currentPlayer: null,
+            playerToAdd: null,
+            currentPlayerOpRef: null
         }
     },
     props: {
@@ -83,7 +87,7 @@ export default defineComponent({
             removePlayer: 'game/removePlayer'
         }),
         openModal(player) {
-            this.player = player;
+            this.currentPlayer = player;
             if (this.isEditMode) {
                 this.modalTrainsEditVisible = true;
             } else {
@@ -91,11 +95,16 @@ export default defineComponent({
             }
         },
         async openOverlay(event, district, sexNum) {
-            this.$refs.selectPlayerOp.toggle(event);
+            this.currentPlayerOpRef = this.$refs.selectPlayerOp[getPlayerIndex(district, sexNum)];
+            this.currentPlayerOpRef.toggle(event);
             this.availablePlayers = await this.getAvailablePlayers({
                 district: district,
                 sex: SEX[sexNum]
             });
+            // auto open dropdown
+            if (this.availablePlayers.length > 0) {
+                openAutoCompleteDropdown(this.currentPlayerOpRef);
+            }
         },
         searchPlayer(event) {
             this.suggestedPlayers = event.query
@@ -103,10 +112,10 @@ export default defineComponent({
                 : [...this.availablePlayers];
         },
         async addPlayerWrapper(event) {
-            this.$refs.selectPlayerOp.toggle(event.originalEvent);
+            this.currentPlayerOpRef.toggle(event.originalEvent);
             await this.addPlayer({
                 gameId: this.$route.params.id,
-                player: this.player
+                player: this.playerToAdd
             });
             this.resetData();
             this.$toast.add({ severity: 'success', summary: 'Игрок успешно добавлен', life: 3000 });
@@ -119,8 +128,10 @@ export default defineComponent({
             this.$toast.add({ severity: 'success', summary: 'Игрок успешно удален', life: 3000 });
         },
         resetData() {
-            this.player = null;
-            this.availablePlayers = null;
+            this.playerToAdd = null;
+            this.availablePlayers = [];
+            this.suggestedPlayers = [];
+            this.currentPlayerOpRef = null;
         }
     }
 })

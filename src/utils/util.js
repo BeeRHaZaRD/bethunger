@@ -47,3 +47,27 @@ function wordCase(value, words){
   if (num === 1) return words[0];
   return words[2];
 }
+
+export function makeFullName(entity) {
+  return entity ? (entity.firstName + ' ' + entity.lastName) : null;
+}
+
+/**
+ *
+ * @param {Object} ref -- ref on
+ */
+export function openAutoCompleteDropdown(ref) {
+  setTimeout(() => {
+    ref.container.querySelector('.p-autocomplete .p-autocomplete-dropdown').click();
+  }, 100);
+}
+
+/**
+ * Get player's index by his district and sex
+ * @param {number} district
+ * @param {number} sexNum
+ * @returns {number}
+ */
+export function getPlayerIndex(district, sexNum) {
+  return 2 * district + sexNum - 2;
+}

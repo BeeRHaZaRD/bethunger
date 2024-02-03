@@ -9,16 +9,16 @@
         </div>
         <div class="col-12">
             <div class="section section-auth">
-                <div class="p-fluid">
-                    <div class="field">
-                        <label for="login">Логин</label>
-                        <InputText id="login" v-model="credentials.login" type="text" autofocus/>
+                <div class="data-form">
+                    <div class="field p-fluid">
+                        <label for="username">Логин</label>
+                        <InputText id="username" v-model="credentials.username" type="text" autofocus/>
                     </div>
-                    <div class="field">
+                    <div class="field p-fluid">
                         <label for="password">Пароль</label>
                         <InputText id="password" v-model="credentials.password" type="password"/>
                     </div>
-                    <Button type="submit" label="Войти" @click="authorize"/>
+                    <Button type="submit" label="Войти" :disabled="!credentials.username.trim() || !credentials.password.trim()" @click="loginWrapper"/>
                 </div>
             </div>
         </div>
@@ -27,13 +27,12 @@
 
 <script>
 import {mapActions} from "vuex";
-import moment from "moment";
 
 export default {
     data() {
         return {
             credentials: {
-                login: "admin",
+                username: "admin",
                 password: "admin"
             }
         }
@@ -43,19 +42,16 @@ export default {
             login: 'currentUser/login',
             fetchBalance: 'account/fetchBalance',
         }),
-        async authorize() {
-            let login = this.credentials.login.trim();
+        async loginWrapper() {
+            let username = this.credentials.username.trim();
             let password = this.credentials.password.trim();
 
-            if (!login || !password) {
-                this.$toast.add({ severity: 'error', summary: 'Ошибка', detail: 'Данные для входа указаны неверно', life: 3000 });
-                return;
-            }
             try {
-                await this.login({login, password});
-                await this.fetchBalance();
+                await this.login({username, password});
+                // await this.fetchBalance();
                 this.$router.push('/games');
             } catch (e) {
+                this.$toast.add({ severity: 'error', summary: 'Ошибка авторизации', detail: e.response.data?.detail, life: 3000 });
                 console.log(e);
             }
         }
@@ -66,5 +62,9 @@ export default {
 <style scoped>
 .section-auth {
     max-width: 200px;
+}
+
+.data-form {
+    grid-template-columns: auto;
 }
 </style>

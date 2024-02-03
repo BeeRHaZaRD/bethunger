@@ -67,6 +67,7 @@
     border: $inputOverlayBorder;
     border-radius: $borderRadius;
     box-shadow: $inputOverlayShadow;
+    margin-top: 4px;
 
     .p-autocomplete-items {
         padding: $inputListPadding;
