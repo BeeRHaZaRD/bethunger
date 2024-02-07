@@ -29,8 +29,8 @@
     </div>
 
     <!-- Подробная информация об игроке -->
-    <Dialog v-model:visible="modalPlayerVisible" modal :showHeader="false" :dismissableMask="true" :style="{width: '1100px'}" @hide="currentPlayer = null">
-        <PlayerInfo :player="currentPlayer"/>
+    <Dialog v-model:visible="modalPlayerVisible" modal :showHeader="false" :dismissableMask="true" @hide="currentPlayer = null">
+        <PlayerInfo :player="currentPlayer" :game-status="gameStatus"/>
     </Dialog>
 
     <!-- Изменение результатов тренировок -->

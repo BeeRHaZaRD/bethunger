@@ -1,6 +1,6 @@
 <template>
     <div class="player-card">
-        <div class="section-info mb-3">
+        <div class="section-info">
             <div>
                 <div class="avatar">
                     <Avatar :image="'https://api.dicebear.com/7.x/personas/svg?seed=' + player.id" size="xlarge" shape="circle"></Avatar>
@@ -14,14 +14,14 @@
                 </h4>
             </div>
         </div>
-        <div class="section-trains data-form mb-4">
+        <div class="section-trains data-form mt-3">
             <div class="field" v-for="(statValue, statName) in trainResults">
                 <label :for="statName">{{TRAIN_RESULTS_NAME[statName]}}</label>
                 <InputNumber v-model="trainResults[statName]" :input-id="statName" class="w-full" readonly :min="0" :max="10" :input-style="{'text-align': 'center'}"/>
                 <Slider v-model="trainResults[statName]" class="w-full" :max="10"/>
             </div>
         </div>
-        <Button class="w-full" label="Сохранить результаты" severity="success" @click="updateTrainResultsWrapper"/>
+        <Button class="mt-4 w-full" label="Сохранить результаты" severity="success" @click="updateTrainResultsWrapper"/>
     </div>
 </template>
 

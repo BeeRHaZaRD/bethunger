@@ -8,13 +8,12 @@
                     </div>
                 </div>
                 <div class="topbar-right" v-if="isUserAuthorized">
-                    <div class="balance">
+                    <div class="balance" v-if="userBalance !== null">
                         <div class="p-text-secondary">Баланс</div>
                         <div>{{userBalance}} &#8381;</div>
                     </div>
                     <Button :label="userFullName" @click="toggleUserMenu" text icon="pi pi-user"/>
                     <Menu ref="userMenu" :model="userMenuItems" :popup="true"/>
-                    <Button label="Выйти" @click="logoutWrapper" icon="pi pi-sign-out"/>
                 </div>
             </div>
         </div>
@@ -69,7 +68,8 @@ export default {
             isUserAuthorized: state => state.currentUser.isAuthorized
         }),
         ...mapGetters({
-            userFullName: 'currentUser/fullName'
+            userFullName: 'currentUser/fullName',
+            currentUserIsUser: 'currentUser/isUser'
         })
     },
     methods: {
@@ -77,7 +77,6 @@ export default {
             setUser: 'currentUser/setUser'
         }),
         ...mapActions({
-            fetchBalance: 'account/fetchBalance',
             setAxiosToken: 'currentUser/setAxiosToken',
             logout: 'currentUser/logout'
         }),
@@ -91,13 +90,13 @@ export default {
             this.logout();
         }
     },
-    created() {
+    async created() {
         const currentUser = JSON.parse(localStorage.getItem('currentUser'));
-        if (currentUser) {
-            this.setAxiosToken(JSON.parse(localStorage.getItem('authToken')));
-            this.setUser(currentUser);
-            this.fetchBalance();
+        if (!currentUser) {
+            return;
         }
+        await this.setAxiosToken(JSON.parse(localStorage.getItem('authToken')));
+        this.setUser(currentUser);
     }
 }
 </script>
@@ -288,7 +287,7 @@ export default {
     margin-bottom: 1rem;
 }
 
-.progress-spinner {
+.content-center {
     position: absolute;
     top: 50%;
     left: 50%;

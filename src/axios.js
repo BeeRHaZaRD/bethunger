@@ -1,5 +1,6 @@
 import axios from "axios";
 import store from "@/store";
+import router from "@/router";
 
 const axiosInstance = axios.create({
   baseURL: 'http://localhost:8080/',
@@ -9,14 +10,17 @@ const axiosInstance = axios.create({
 });
 
 axiosInstance.interceptors.response.use(
-    (response) => response,
+    (response) => Promise.resolve(response),
     (error) => {
-      if (error.response?.status === 401) {
+      const status = error.response?.status;
+      if (status === 401) {
         store.dispatch('currentUser/logout');
-      } else if (error.response?.status === 403) {
-        console.log("Error 403")
+      } else if (status === 403) {
+        router.push('/forbidden');
+      } else if (status === 404 && error.config.method === 'get') {
+        router.push('/not-found');
       }
-
+      console.log("Error intercepted", error)
       return Promise.reject(error);
     });
 

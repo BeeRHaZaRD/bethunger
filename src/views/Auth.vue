@@ -39,8 +39,7 @@ export default {
     },
     methods: {
         ...mapActions({
-            login: 'currentUser/login',
-            fetchBalance: 'account/fetchBalance',
+            login: 'currentUser/login'
         }),
         async loginWrapper() {
             let username = this.credentials.username.trim();
@@ -48,11 +47,9 @@ export default {
 
             try {
                 await this.login({username, password});
-                // await this.fetchBalance();
                 this.$router.push('/games');
             } catch (e) {
-                this.$toast.add({ severity: 'error', summary: 'Ошибка авторизации', detail: e.response.data?.detail, life: 3000 });
-                console.log(e);
+                this.$toast.add({ severity: 'error', summary: 'Ошибка авторизации', detail: e.response.data.detail, life: 3000 });
             }
         }
     }

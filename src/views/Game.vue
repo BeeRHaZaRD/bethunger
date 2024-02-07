@@ -7,7 +7,7 @@
                         <h1>{{name}}</h1>
                         <Tag :value="GAME_STATUS[status]" :severity="GAME_STATUS_SEVERITY[status]"></Tag>
                     </div>
-                    <div class="controls">
+                    <div class="controls" v-if="isManager || isAdmin">
                         <template v-if="status === 'DRAFT' || status === 'PLANNED'">
                             <Button class="hidden md:inline-flex" icon="pi pi-file-edit" label="Редактировать" outlined @click="$router.push($route.path + '/edit')"/>
                             <Button class="md:hidden" icon="pi pi-file-edit" outlined @click="$router.push($route.path + '/edit')"/>
@@ -68,10 +68,10 @@
                         </div>
                     </div>
                 </div>
-                <div class="section-planned-events mb-5">
-                    <PlannedEventList :planned-events="plannedEvents" :event-types="eventTypes" title="Планировка событий"/>
+                <div class="section-planned-events mb-5" v-if="isManager || isAdmin">
+                    <PlannedEventList :planned-events="plannedEvents" title="Планировка событий"/>
                 </div>
-                <div class="section-items mb-5" v-if="status === 'DRAFT' || status === 'PLANNED'">
+                <div class="section-items mb-5" v-if="(isManager || isAdmin) && (status === 'DRAFT' || status === 'PLANNED')">
                     <ItemList :items="items" title="Предметы"/>
                 </div>
                 <div class="section-events" v-if="status === 'ONGOING' || status === 'COMPLETED'">
@@ -104,7 +104,7 @@
             </div>
         </OverlayPanel>
     </div>
-    <div v-else class="progress-spinner">
+    <div v-else class="content-center">
         <ProgressSpinner strokeWidth="2"/>
     </div>
 </template>
@@ -148,13 +148,15 @@ export default {
             description: state => state.game.description,
             manager: state => state.game.manager,
             winner: state => state.game.winner,
-            eventTypes: state => state.game.eventTypes,
             happenedEvents: state => state.game.happenedEvents,
             plannedEvents: state => state.game.plannedEvents,
             players: state => state.game.players,
             items: state => state.game.items
         }),
         ...mapGetters({
+            isUser: 'currentUser/isUser',
+            isManager: 'currentUser/isManager',
+            isAdmin: 'currentUser/isAdmin',
             playersNum: 'game/playersNum'
         }),
         dateStartString() {
@@ -205,7 +207,7 @@ export default {
                 // TODO fix toast
                 this.$toast.add({ severity: 'success', summary: 'Игра успешно опубликована', life: 3000 });
             } catch (e) {
-                this.$toast.add({ severity: 'error', summary: 'Ошибка публикации игры', detail: e.response.data, life: 3000 });
+                this.$toast.add({ severity: 'error', summary: 'Ошибка публикации игры', detail: e.response.data.detail, life: 3000 });
             }
         },
         confirmStart() {
@@ -226,7 +228,7 @@ export default {
                 // TODO fix toast
                 this.$toast.add({ severity: 'success', summary: 'Игра успешно запущена', life: 3000 });
             } catch (e) {
-                this.$toast.add({ severity: 'error', summary: 'Ошибка запуска игры', detail: e.response.data, life: 3000 });
+                this.$toast.add({ severity: 'error', summary: 'Ошибка запуска игры', detail: e.response.data.detail, life: 3000 });
             }
         },
         pollEvents() {
@@ -241,15 +243,16 @@ export default {
         }
     },
     async mounted() {
-        await this.fetchGame(this.$route.params.id);
-        this.setIsEditMode(false);
-        this.isDataLoaded = true;
+        try {
+            await this.fetchGame(this.$route.params.id);
+            this.setIsEditMode(false);
+            this.isDataLoaded = true;
 
-        if (this.status === 'ONGOING') {
-            this.timer = useStopwatch(Math.round((new Date() - this.dateStart) / 1000), true);
-        }
-
-        // this.pollEvents();
+            if (this.status === 'ONGOING') {
+                this.timer = useStopwatch(Math.round((new Date() - this.dateStart) / 1000), true);
+            }
+            this.pollEvents();
+        } catch {}
     },
     beforeUnmount() {
         if (this.eventPollingId) {
@@ -257,7 +260,9 @@ export default {
             this.eventPollingId = null;
         }
         // for the watcher to work correctly
-        this.resetGame();
+        if (this.isDataLoaded) {
+            this.resetGame();
+        }
     }
 }
 </script>

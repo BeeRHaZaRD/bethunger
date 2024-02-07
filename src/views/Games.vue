@@ -6,12 +6,18 @@
                     <h1>Все турниры</h1>
                 </div>
                 <div class="controls">
-                    <Button label="Создать игру" icon="pi pi-plus" @click="openModal"/>
+                    <Button v-if="isAdmin" label="Создать игру" icon="pi pi-plus" @click="openModal"/>
                 </div>
             </div>
         </div>
         <div class="col-12">
             <DataTable :value="games" dataKey="id" selectionMode="single" sort-field="id" :sort-order="1" @rowSelect="openGame">
+                <template #empty>
+                    <div class="text-center text-color-secondary">Нет данных</div>
+                </template>
+                <template #loading>
+                    <div class="text-center text-color-secondary">Загрузка данных...</div>
+                </template>
                 <Column field="name" header="Название"></Column>
                 <Column field="manager.fullName" header="Распорядитель"></Column>
                 <Column field="arenaType" header="Арена"></Column>
@@ -32,7 +38,7 @@
 
     <Dialog v-model:visible="modalVisible" modal :show-header="false" :dismissableMask="true" :style="{width: '900px'}">
         <h2>Новая игра</h2>
-        <div class="data-form">
+        <div class="data-form mb-4">
             <div class="field p-fluid">
                 <label for="gameName">Название</label>
                 <InputText id="gameName" v-model="newGame.name" type="text"/>
@@ -43,15 +49,13 @@
                               :disabled="availableManagers.length === 0" :placeholder="availableManagers.length === 0 ? 'Нет доступных менеджеров' : ''"/>
             </div>
         </div>
-        <template #footer>
-            <Button label="Создать игру" severity="success" :disabled="!newGame.name.trim() || !newGame.manager?.id" @click="createGameWrapper"/>
-        </template>
+        <Button label="Создать игру" severity="success" :disabled="!newGame.name.trim() || !newGame.manager?.id" @click="createGameWrapper"/>
     </Dialog>
 </template>
 
 <script>
 import moment from "moment";
-import {mapActions} from "vuex";
+import {mapActions, mapGetters} from "vuex";
 import {GAME_STATUS, GAME_STATUS_SEVERITY} from "@/enums/enums";
 export default {
     data() {
@@ -68,6 +72,11 @@ export default {
                 manager: null
             }
         }
+    },
+    computed: {
+        ...mapGetters({
+            isAdmin: 'currentUser/isAdmin'
+        })
     },
     methods: {
         ...mapActions({

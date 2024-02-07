@@ -12,7 +12,10 @@ export const currentUser = {
     isAuthorized: false
   }),
   getters: {
-    fullName: state => state.firstName + ' ' + state.lastName
+    fullName: state => state.firstName + ' ' + state.lastName,
+    isUser: state => state.role === 'USER',
+    isManager: state => state.role === 'MANAGER',
+    isAdmin: state => state.role === 'ADMIN'
   },
   mutations: {
     setUser(state, user) {

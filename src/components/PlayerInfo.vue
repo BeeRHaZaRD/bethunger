@@ -1,11 +1,11 @@
 <template>
-    <div class="player-card">
-        <div class="section-info mb-3">
+    <div class="player-card" :class="{'full': gameStatus === 'ONGOING' || gameStatus === 'COMPLETED'}">
+        <div class="section-info">
             <div>
                 <div class="avatar">
-                    <Avatar :image="'https://api.dicebear.com/7.x/personas/svg?seed=' + player.id" size="xlarge" shape="circle"></Avatar>
+                    <Avatar :image="'https://api.dicebear.com/7.x/personas/svg?seed=' + player.id" size="xlarge" shape="circle"/>
                 </div>
-                <Tag :value="PLAYER_STATUS[player.status]" :severity="PLAYER_STATUS_SEVERITY[player.status]"></Tag>
+                <Tag :value="PLAYER_STATUS[player.status]" :severity="PLAYER_STATUS_SEVERITY[player.status]"/>
             </div>
             <div class="info-text">
                 <h2 class="title">{{player.fullName}}</h2>
@@ -18,22 +18,22 @@
                 <!-- TODO -->
             </div>
         </div>
-        <div class="section-trains mb-5">
+        <div class="section-trains mt-3">
             <h2>Результаты тренировок</h2>
-            <div v-if="player.trainResults" class="progress-items">
-                <div class="item" v-for="(statValue, statName) in player.trainResults">
+            <div v-if="player.trainResults" class="trains">
+                <div class="train" v-for="(statValue, statName) in player.trainResults">
                     <div class="title">
                         <span class="key">{{TRAIN_RESULTS_NAME[statName]}}</span>
                         <span class="value">{{statValue}}/10</span>
                     </div>
-                    <ProgressBar :value="statValue * 10" :showValue="false"></ProgressBar>
+                    <ProgressBar :value="statValue * 10" :showValue="false"/>
                 </div>
             </div>
             <div v-else class="card">
                 <p class="text-center p-text-secondary">Нет данных</p>
             </div>
         </div>
-        <div class="section-items">
+        <div class="section-items mt-5">
             <!-- TODO received items -->
             <ItemList :items="[]" title="Полученные предметы"/>
         </div>
@@ -48,7 +48,7 @@ import {defineComponent} from 'vue'
 import {PLAYER_STATUS, PLAYER_STATUS_SEVERITY, SEX_NAME, TRAIN_RESULTS_NAME} from "@/enums/enums";
 import HappenedEventList from "@/components/HappenedEventList.vue";
 import ItemList from "@/components/ItemList.vue";
-import {mapActions} from "vuex";
+import {mapActions, mapGetters} from "vuex";
 
 export default defineComponent({
     name: "PlayerInfo",
@@ -56,6 +56,10 @@ export default defineComponent({
     props: {
         player: {
             type: Object,
+            required: true
+        },
+        gameStatus: {
+            type: String,
             required: true
         }
     },
@@ -84,6 +88,10 @@ export default defineComponent({
 
 <style scoped>
 .player-card {
+    min-width: 700px;
+}
+
+.player-card.full {
     display: grid;
     column-gap: 2rem;
     grid-template-columns: 1fr 1fr;
@@ -92,63 +100,50 @@ export default defineComponent({
     "info events"
     "trains events"
     "items events";
+    min-width: 1100px;
 }
 
-.player-card .section-info {
+.player-card.full .section-info {
     grid-area: info;
 }
 
-.player-card .section-trains {
+.player-card.full .section-trains {
     grid-area: trains;
 }
 
-.player-card .section-items {
+.player-card.full .section-items {
     grid-area: items;
 }
 
-.player-card .section-events {
+.player-card.full .section-events {
     grid-area: events;
 }
 
-.progress-items {
+.trains {
     display: grid;
     grid-template-columns: 1fr 1fr;
     column-gap: 2rem;
     row-gap: 1.25rem;
 }
 
-.progress-items .item .title {
+.trains .train .title {
     display: flex;
     justify-content: space-between;
     margin-bottom: 0.5rem;
 }
 
-.progress-items .item .value {
+.trains .train .value {
     color: var(--text-color-secondary);
 }
 
-.supply-items .item {
-    display: flex;
-    border-radius: 6px;
-    background-color: var(--bg-2);
+.section-items,
+.section-events {
+    display: none;
 }
 
-.supply-items .item .image {
-    padding: 5px;
-    background-color: #232323;
-    border-top-left-radius: 6px;
-    border-bottom-left-radius: 6px;
-}
-
-.supply-items .item .text {
-    display: flex;
-    padding: 1rem;
-    flex-direction: column;
-    justify-content: center;
-}
-
-.supply-items .item .description {
-    color: var(--text-color-secondary);
+.player-card.full .section-items,
+.player-card.full .section-events {
+    display: block;
 }
 
 .p-progressbar {

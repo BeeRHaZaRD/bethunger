@@ -45,10 +45,10 @@ export const game = {
       if (game.winner) {
         state.winner.fullName = makeFullName(game.winner);
       }
-      state.eventTypes = game.eventTypes;
-      state.happenedEvents = game.happenedEvents;
-      state.plannedEvents = game.plannedEvents;
-      state.items = game.items;
+      state.eventTypes = game.eventTypes || [];
+      state.happenedEvents = game.happenedEvents || [];
+      state.plannedEvents = game.plannedEvents || [];
+      state.items = game.items || [];
       for (const district in game.players) {
         for (const player of game.players[district]) {
           if (player) {
@@ -125,8 +125,6 @@ export const game = {
       }).then(response => {
         commit('setGame', response.data);
         console.log(response.data);
-      }).catch(e => {
-        console.log(e);
       });
     },
     getAllGames() {
@@ -208,8 +206,6 @@ export const game = {
         url: '/games/' + gameId + '/items/' + item.id,
       }).then((response) => {
         commit('addItem', response.data);
-      }).catch(e => {
-        console.log(e);
       });
     },
     removeItem({commit}, {gameId, item}) {

@@ -11,8 +11,8 @@ export const account = {
     }
   },
   actions: {
-    async fetchBalance({commit}) {
-      await axios({
+    fetchBalance({commit}) {
+      return axios({
         method: 'get',
         url: '/account/balance'
       }).then(response => {
@@ -21,10 +21,23 @@ export const account = {
         console.log(e);
       });
     },
-    async deposit({commit}, amount) {
-      await axios({
+    deposit({commit}, amount) {
+      return axios({
         method: 'post',
         url: '/account/deposit',
+        data: {
+          amount: amount
+        }
+      }).then(response => {
+        commit('setBalance', response.data.balance);
+      }).catch(e => {
+        console.log(e);
+      });
+    },
+    withdraw({commit}, amount) {
+      return axios({
+        method: 'post',
+        url: '/account/withdraw',
         data: {
           amount: amount
         }

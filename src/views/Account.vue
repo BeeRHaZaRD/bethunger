@@ -9,9 +9,12 @@
         </div>
         <div class="col-12">
             <div class="section section-balance">
-                <h3 class="balance">Текущий баланс: <span class="font-semibold">{{balance}} &#8381;</span></h3>
+                <h3 class="balance">
+                    <span>Текущий баланс:</span>
+                    <span class="font-semibold ml-2" v-if="balance !== null">{{balance}} &#8381;</span>
+                </h3>
                 <div class="balance-buttons">
-                    <Button label="Пополнить" @click="$refs.opDeposit.toggle($event)"/>
+                    <Button class="mr-3" label="Пополнить" @click="$refs.opDeposit.toggle($event)"/>
                     <Button label="Вывести" @click="$refs.opWithdraw.toggle($event)"/>
                 </div>
             </div>
@@ -20,23 +23,23 @@
         <OverlayPanel ref="opDeposit">
             <div class="op-content">
                 <p class="op-title">Пополнение счета</p>
-                <InputNumber v-model="depositAmount" class="mr-2" :minFractionDigits="0" :maxFractionDigits="2" :useGrouping="false" :min="10" :max="1000000" suffix=" &#8381;" :input-style="{width: '10rem'}"/>
-                <Button severity="success" label="Пополнить" @click="depositWrapper" />
+                <InputNumber v-model="depositAmount" class="mr-2" :minFractionDigits="0" :maxFractionDigits="2" :useGrouping="false" :min="10" :max="100000" locale="ru" :input-style="{width: '10rem'}"/>
+                <Button severity="success" label="Пополнить" @click="depositWrapper"/>
             </div>
         </OverlayPanel>
 
         <OverlayPanel ref="opWithdraw">
             <div class="op-content">
                 <p class="op-title">Вывод средств</p>
-                <InputNumber v-model="withdrawAmount" class="mr-2" :minFractionDigits="0" :maxFractionDigits="2" :useGrouping="false" :min="10" :max="1000000" suffix=" &#8381;" :input-style="{width: '10rem'}"/>
-                <Button severity="success" label="Вывести" @click="withdrawWrapper" />
+                <InputNumber v-model="withdrawAmount" class="mr-2" :minFractionDigits="0" :maxFractionDigits="2" :useGrouping="false" :min="10" :max="100000" suffix=" &#8381;" :input-style="{width: '10rem'}"/>
+                <Button severity="success" label="Вывести" @click="withdrawWrapper"/>
             </div>
         </OverlayPanel>
     </div>
 </template>
 
 <script>
-import {mapActions, mapState} from "vuex";
+import {mapActions, mapGetters, mapState} from "vuex";
 
 export default {
     data() {
@@ -48,24 +51,25 @@ export default {
     computed: {
         ...mapState({
             balance: state => state.account.balance
-        }),
+        })
     },
     methods: {
         ...mapActions({
-            fetchBalance: 'account/fetchBalance',
-            deposit: 'account/deposit'
+            deposit: 'account/deposit',
+            withdraw: 'account/withdraw'
         }),
         async depositWrapper() {
             await this.deposit(this.depositAmount);
+            this.depositAmount = null;
+            this.$refs.opDeposit.hide();
             this.$toast.add({ severity: 'success', summary: 'Успешное пополнение', detail: 'Счет пополнен на ' + this.depositAmount + ' Р', life: 5000 });
         },
         async withdrawWrapper() {
             await this.withdraw(this.depositAmount);
+            this.withdrawAmount = null;
+            this.$refs.opWithdraw.hide();
             this.$toast.add({ severity: 'success', summary: 'Успешное пополнение', detail: 'Средства выведены со счета: ' + this.withdrawAmount + ' Р', life: 5000 });
         }
-    },
-    async mounted() {
-        await this.fetchBalance();
     }
 }
 </script>
@@ -73,10 +77,6 @@ export default {
 <style scoped>
 .balance {
     margin-bottom: 1.5rem;
-}
-
-.balance-buttons > * {
-    margin-right: 10px;
 }
 
 .deposit-amount {
