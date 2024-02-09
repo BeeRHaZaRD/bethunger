@@ -204,8 +204,6 @@ export default {
             this.modalPublishVisible = false;
             try {
                 await this.publishGame(this.$route.params.id);
-                // TODO fix toast
-                this.$toast.add({ severity: 'success', summary: 'Игра успешно опубликована', life: 3000 });
             } catch (e) {
                 this.$toast.add({ severity: 'error', summary: 'Ошибка публикации игры', detail: e.response.data.detail, life: 3000 });
             }
@@ -225,8 +223,6 @@ export default {
             this.modalStartVisible = false;
             try {
                 await this.startGame(this.$route.params.id);
-                // TODO fix toast
-                this.$toast.add({ severity: 'success', summary: 'Игра успешно запущена', life: 3000 });
             } catch (e) {
                 this.$toast.add({ severity: 'error', summary: 'Ошибка запуска игры', detail: e.response.data.detail, life: 3000 });
             }
@@ -239,7 +235,7 @@ export default {
                     gameId: this.$route.params.id,
                     after: this.happenedEvents.length > 0 ? this.happenedEvents[0].happenedAt : dateTimeToIso(this.dateStart)
                 })
-            }, 10000);
+            }, 5000);
         }
     },
     async mounted() {

@@ -72,7 +72,7 @@ export default {
         }
     },
     async mounted() {
-        if (this.player.trainResults !== null) {
+        if (this.player.trainResults) {
             this.trainResults = {...this.player.trainResults};
         }
     }

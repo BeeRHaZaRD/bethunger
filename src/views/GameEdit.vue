@@ -5,7 +5,7 @@
                 <div class="content-header">
                     <div class="title">
                         <h1>Редактирование игры</h1>
-                        <Tag :value="GAME_STATUS[status]" :severity="GAME_STATUS_SEVERITY[status]"></Tag>
+                        <Tag :value="GAME_STATUS[status]" :severity="GAME_STATUS_SEVERITY[status]"/>
                     </div>
                     <div class="controls">
                         <Button label="К игре" icon="pi pi-link" outlined @click="$router.push('/games/' + $route.params.id)"/>
