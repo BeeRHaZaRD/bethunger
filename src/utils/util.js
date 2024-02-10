@@ -39,7 +39,7 @@ export function formatTimer(days, hours, minutes, seconds) {
   }
 }
 
-function wordCase(value, words){
+export function wordCase(value, words){
   value = Math.abs(value) % 100;
   let num = value % 10;
   if (value > 10 && value < 20) return words[2];
@@ -52,13 +52,9 @@ export function makeFullName(entity) {
   return entity ? (entity.firstName + ' ' + entity.lastName) : null;
 }
 
-/**
- *
- * @param {Object} ref -- ref on
- */
-export function openAutoCompleteDropdown(ref) {
+export function openDropdown(ref) {
   setTimeout(() => {
-    ref.container.querySelector('.p-autocomplete .p-autocomplete-dropdown').click();
+    ref.container.querySelector('.p-dropdown').click();
   }, 100);
 }
 

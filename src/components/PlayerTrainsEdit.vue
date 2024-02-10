@@ -64,12 +64,8 @@ export default {
                 trainResults: {...this.trainResults}
             });
             this.$emit('closeModal');
-            this.resetData();
             this.$toast.add({ severity: 'success', summary: 'Тренировки успешно обновлены', life: 3000 });
         },
-        resetData() {
-            this.trainResults = null;
-        }
     },
     async mounted() {
         if (this.player.trainResults) {

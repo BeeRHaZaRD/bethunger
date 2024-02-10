@@ -3,8 +3,10 @@
     <div class="data-form">
         <div class="field p-fluid">
             <label for="item">Предмет</label>
-            <AutoComplete v-model="item" input-id="item" dropdown :suggestions="suggestedItems" optionLabel="name" @complete="search"
-                          :disabled="availableItems.length === 0" :placeholder="availableItems.length === 0 ? 'Нет доступных предметов' : ''"/>
+            <Dropdown v-model="item" editable :options="availableItems" optionLabel="name"
+                      :class="{'p-invalid': v$.item.$error}" :disabled="availableItems.length === 0"
+                      :placeholder="availableItems.length === 0 ? 'Нет доступных предметов' : ''"/>
+            <small class="p-error">{{v$.item.$errors[0]?.$message}}</small>
         </div>
     </div>
     <div v-if="availableItems.length > 0" class="data-list mt-3">
@@ -20,20 +22,31 @@
         <div v-if="item?.id" class="value">{{item.price}} &#8381;</div>
         <div v-else class="value">-</div>
     </div>
-    <Button class="mt-4 w-full" label="Добавить предмет" severity="success" :disabled="!item?.id" @click="addItemWrapper"/>
+    <Button class="mt-4 w-full" label="Добавить предмет" severity="success" :disabled="v$.$error" @click="addItemWrapper"/>
 </template>
 
 <script>
 import {defineComponent} from "vue";
 import {mapActions, mapState} from "vuex";
+import {useVuelidate} from "@vuelidate/core";
+import {required, requiredIf} from "@/utils/localized-validators";
 export default defineComponent({
     name: "ItemAdd",
     emits: ['success'],
+    setup: () => ({ v$: useVuelidate() }),
     data() {
         return {
             item: null,
-            availableItems: [],
-            suggestedItems: []
+            availableItems: []
+        }
+    },
+    validations() {
+        return {
+            item: {
+                id: {
+                    required: required()
+                }
+            }
         }
     },
     computed: {
@@ -46,12 +59,10 @@ export default defineComponent({
             getAllItems: 'game/getAllItems',
             addItem: 'game/addItem'
         }),
-        search(event) {
-            this.suggestedItems = event.query
-                ? this.availableItems.filter(item => item.name.toLowerCase().startsWith(event.query.toLowerCase()))
-                : [...this.availableItems];
-        },
         async addItemWrapper() {
+            if (!(await this.v$.$validate())) {
+                return;
+            }
             try {
                 await this.addItem({
                     gameId: this.$route.params.id,

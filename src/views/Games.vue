@@ -6,7 +6,7 @@
                     <h1>Все турниры</h1>
                 </div>
                 <div class="controls">
-                    <Button v-if="isAdmin" label="Создать игру" icon="pi pi-plus" @click="openModal"/>
+                    <Button v-if="isAdmin" label="Создать игру" icon="pi pi-plus" @click="visibleModals.gameCreate = true"/>
                 </div>
             </div>
         </div>
@@ -36,20 +36,8 @@
         </div>
     </div>
 
-    <Dialog v-model:visible="modalVisible" modal :show-header="false" :dismissableMask="true" :style="{width: '900px'}">
-        <h2>Новая игра</h2>
-        <div class="data-form mb-4">
-            <div class="field p-fluid">
-                <label for="gameName">Название</label>
-                <InputText id="gameName" v-model="newGame.name" type="text"/>
-            </div>
-            <div class="field p-fluid">
-                <label for="gameManager">Распорядитель</label>
-                <AutoComplete v-model="newGame.manager" input-id="gameManager" dropdown :suggestions="suggestedManagers" optionLabel="fullName" @complete="searchManager"
-                              :disabled="availableManagers.length === 0" :placeholder="availableManagers.length === 0 ? 'Нет доступных менеджеров' : ''"/>
-            </div>
-        </div>
-        <Button label="Создать игру" severity="success" :disabled="!newGame.name.trim() || !newGame.manager?.id" @click="createGameWrapper"/>
+    <Dialog v-model:visible="visibleModals.gameCreate" modal :show-header="false" :dismissableMask="true" :style="{width: '900px'}">
+        <GameCreate @success="addCreatedGame"/>
     </Dialog>
 </template>
 
@@ -57,19 +45,16 @@
 import moment from "moment";
 import {mapActions, mapGetters} from "vuex";
 import {GAME_STATUS, GAME_STATUS_SEVERITY} from "@/enums/enums";
+import GameCreate from "@/components/GameCreate.vue";
 export default {
+    components: {GameCreate},
     data() {
         return {
             games: [],
             GAME_STATUS: GAME_STATUS,
             GAME_STATUS_SEVERITY: GAME_STATUS_SEVERITY,
-            modalVisible: false,
-            isAvailableManagersLoaded: false,
-            availableManagers: [],
-            suggestedManagers: [],
-            newGame: {
-                name: '',
-                manager: null
+            visibleModals: {
+                gameCreate: false
             }
         }
     },
@@ -80,36 +65,14 @@ export default {
     },
     methods: {
         ...mapActions({
-            getAllGames: 'game/getAllGames',
-            getAllManagers: 'game/getAllManagers',
-            createGame: 'game/createGame'
+            getAllGames: 'game/getAllGames'
         }),
         openGame(event) {
             this.$router.push(`/games/${event.data.id}`)
         },
-        async openModal() {
-            if (!this.isAvailableManagersLoaded) {
-                this.availableManagers = await this.getAllManagers();
-                this.isAvailableManagersLoaded = true;
-            }
-            this.modalVisible = true;
-        },
-        searchManager(event) {
-            this.suggestedManagers = event.query
-                ? this.availableManagers.filter(manager => manager.fullName.toLowerCase().includes(event.query.toLowerCase()))
-                : [...this.availableManagers];
-        },
-        async createGameWrapper() {
-            const game = await this.createGame(this.newGame);
+        addCreatedGame(game) {
             this.games.push(game);
-            this.modalVisible = false;
-            this.resetData();
-            this.$toast.add({ severity: 'success', summary: 'Игра успешно создана', life: 3000 });
-        },
-        resetData() {
-            this.newGame.name = '';
-            this.newGame.manager = null;
-            this.suggestedManagers = [];
+            this.visibleModals.gameCreate = false;
         }
     },
     async mounted() {

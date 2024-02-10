@@ -21,6 +21,7 @@ import AutoComplete from "primevue/autocomplete";
 import Calendar from "primevue/calendar";
 import Textarea from "primevue/textarea";
 import Slider from "primevue/slider";
+import Dropdown from "primevue/dropdown";
 
 export default {
     components: [
@@ -32,6 +33,7 @@ export default {
         InputText,
         InputNumber,
         AutoComplete,
+        Dropdown,
         Textarea,
         Slider,
         Calendar,

@@ -15,7 +15,7 @@
                 </h4>
             </div>
             <div class="buttons">
-                <!-- TODO -->
+                <!-- TODO bet/supply buttons -->
             </div>
         </div>
         <div class="section-trains mt-3">
@@ -48,7 +48,7 @@ import {defineComponent} from 'vue'
 import {PLAYER_STATUS, PLAYER_STATUS_SEVERITY, SEX_NAME, TRAIN_RESULTS_NAME} from "@/enums/enums";
 import HappenedEventList from "@/components/HappenedEventList.vue";
 import ItemList from "@/components/ItemList.vue";
-import {mapActions, mapGetters} from "vuex";
+import {mapActions, mapGetters, mapState} from "vuex";
 
 export default defineComponent({
     name: "PlayerInfo",
@@ -72,16 +72,15 @@ export default defineComponent({
             happenedEvents: []
         }
     },
-    methods: {
-        ...mapActions({
-            getHappenedEventsByPlayer: 'game/getHappenedEventsByPlayer'
-        })
+    computed: {
+        ...mapState({
+            gameHappenedEvents: state => state.game.happenedEvents,
+        }),
     },
     async mounted() {
-        this.happenedEvents = await this.getHappenedEventsByPlayer({
-            gameId: this.$route.params.id,
-            playerId: this.player.id
-        });
+        this.happenedEvents = this.gameHappenedEvents.filter(event =>
+            (event.type === 'PLAYER' || event.type === 'OTHER') && event.player?.id === this.player.id
+        );
     }
 })
 </script>

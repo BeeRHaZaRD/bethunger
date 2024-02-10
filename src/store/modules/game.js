@@ -143,20 +143,18 @@ export const game = {
         console.log(e);
       });
     },
-    createGame(_, game) {
+    createGame(_, {name, managerId}) {
       return axios({
         method: 'post',
         url: '/games',
         data: {
-          name: game.name,
-          managerId: game.manager.id
+          name: name,
+          managerId: managerId
         }
       }).then(response => {
         const newGame = response.data;
         newGame.manager.fullName = newGame.manager ? (newGame.manager.firstName + ' ' + newGame.manager.lastName) : null;
         return newGame;
-      }).catch(e => {
-        console.log(e);
       });
     },
     updateGameInfo({commit}, {gameId, game}) {
@@ -240,8 +238,6 @@ export const game = {
         const player = response.data;
         player.fullName = makeFullName(player);
         commit('addPlayer', player);
-      }).catch(e => {
-        console.log(e);
       });
     },
     removePlayer({commit}, {gameId, player}) {
@@ -328,21 +324,6 @@ export const game = {
           }
           commit('addHappenedEvent', event);
         }
-      }).catch(e => {
-        console.log(e);
-      });
-    },
-    getHappenedEventsByPlayer({commit}, {gameId, playerId}) {
-      return axios({
-        method: 'get',
-        url: '/games/' + gameId + '/happenedEvents',
-        params: {
-          playerId: playerId
-        }
-      }).then(response => {
-        return response.data;
-      }).catch(e => {
-        console.log(e);
       });
     },
     getAllManagers() {

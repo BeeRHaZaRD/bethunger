@@ -21,24 +21,30 @@
                     </div>
                     <div class="data-form w-min">
                         <div class="field">
-                            <label for="gameName">Название</label>
-                            <InputText id="gameName" v-model="game.name" type="text" :class="{'p-invalid': !game.name.trim()}"/>
+                            <label for="gameUpdateName">Название</label>
+                            <InputText id="gameUpdateName" v-model="game.name" type="text" :class="{'p-invalid': v$.game.name.$error}"/>
+                            <small class="p-error">{{v$.game.name.$errors[0]?.$message}}</small>
                         </div>
                         <div class="field">
-                            <label for="gameDescription">Описание</label>
-                            <Textarea id="gameDescription" v-model="game.description" autoResize rows="3" cols="50"/>
+                            <label for="gameUpdateDescription">Описание</label>
+                            <Textarea id="gameUpdateDescription" v-model="game.description" autoResize rows="3" cols="50" :class="{'p-invalid': v$.game.description.$error}"/>
+                            <small class="p-error">{{v$.game.description.$errors[0]?.$message}}</small>
                         </div>
                         <div class="field">
-                            <label for="arenaType">Тип арены</label>
-                            <InputText id="arenaType" v-model="game.arenaType" type="text"/>
+                            <label for="gameUpdateArenaType">Тип арены</label>
+                            <InputText id="gameUpdateArenaType" v-model="game.arenaType" type="text" :class="{'p-invalid': v$.game.arenaType.$error}"/>
+                            <small class="p-error">{{v$.game.arenaType.$errors[0]?.$message}}</small>
                         </div>
                         <div class="field">
-                            <label for="arenaDescription">Описание арены</label>
-                            <Textarea id="arenaDescription" v-model="game.arenaDescription" autoResize rows="3" cols="50"/>
+                            <label for="gameUpdateArenaDescription">Описание арены</label>
+                            <Textarea id="gameUpdateArenaDescription" v-model="game.arenaDescription" autoResize rows="3" cols="50" :class="{'p-invalid': v$.game.arenaDescription.$error}"/>
+                            <small class="p-error">{{v$.game.arenaDescription.$errors[0]?.$message}}</small>
                         </div>
                         <div class="field">
-                            <label for="dateStart">Время начала</label>
-                            <Calendar v-model="game.dateStart" input-id="dateStart" showTime hourFormat="24" :min-date="new Date()" :panel-style="{width: '359px'}"/>
+                            <label for="gameUpdateDateStart">Время начала</label>
+                            <Calendar v-model="game.dateStart" input-id="gameUpdateDateStart" showTime hourFormat="24" manual-input :min-date="new Date()"
+                                      :panel-style="{width: '359px'}" :class="{'p-invalid': v$.game.dateStart.$error}"/>
+                            <small class="p-error">{{v$.game.dateStart.$errors[0]?.$message}}</small>
                         </div>
                         <Button class="w-full mt-2" label="Сохранить" severity="success" :disabled="!game.name.trim()" @click="updateGameInfoWrapper"/>
                     </div>
@@ -49,7 +55,7 @@
                 </div>
                 <div class="section-items">
                     <ItemList :items="items" title="Предметы"/>
-                    <Button class="mt-3" label="ДОБАВИТЬ" icon="pi pi-plus" severity="secondary" text @click="visibleModals.itemEdit = true"/>
+                    <Button class="mt-3" label="ДОБАВИТЬ" icon="pi pi-plus" severity="secondary" text @click="visibleModals.itemAdd = true"/>
                 </div>
             </div>
             <div class="col-12 xl:col-6">
@@ -61,8 +67,8 @@
             <PlannedEventEdit type="add" @success="visibleModals.plannedEventAdd = false"/>
         </Dialog>
 
-        <Dialog v-model:visible="visibleModals.itemEdit" modal :show-header="false" :dismissableMask="true" :style="{width: '500px'}">
-            <ItemAdd @success="visibleModals.itemEdit = false"/>
+        <Dialog v-model:visible="visibleModals.itemAdd" modal :show-header="false" :dismissableMask="true" :style="{width: '500px'}">
+            <ItemAdd @success="visibleModals.itemAdd = false"/>
         </Dialog>
     </div>
     <div v-else class="content-center">
@@ -80,10 +86,13 @@ import PlannedEventList from "@/components/PlannedEventList.vue";
 import PlayerTrainsEdit from "@/components/PlayerTrainsEdit.vue";
 import ItemAdd from "@/components/ItemAdd.vue";
 import PlannedEventEdit from "@/components/PlannedEventEdit.vue";
+import {useVuelidate} from "@vuelidate/core";
+import {maxLength, required} from "@/utils/localized-validators";
 
 export default {
     name: "GameEdit",
     components: {PlannedEventEdit, ItemAdd, PlayerTrainsEdit, PlannedEventList, PlayerList, HappenedEventList, ItemList},
+    setup: () => ({ v$: useVuelidate() }),
     data() {
         return {
             GAME_STATUS: GAME_STATUS,
@@ -97,8 +106,31 @@ export default {
                 dateStart: null
             },
             visibleModals: {
-                itemEdit: false,
+                itemAdd: false,
                 plannedEventAdd: false
+            }
+        }
+    },
+    validations() {
+        return {
+            game: {
+                name: {
+                    required: required(),
+                    maxLength: maxLength(32)
+                },
+                description: {
+                    required: required()
+                },
+                arenaType: {
+                    required: required(),
+                    maxLength: maxLength(32)
+                },
+                arenaDescription: {
+                    required: required()
+                },
+                dateStart: {
+                    required: required()
+                }
             }
         }
     },
@@ -124,9 +156,7 @@ export default {
         }),
         ...mapActions({
             fetchGame: 'game/fetchGame',
-            fetchHappenedEvents: 'game/fetchHappenedEvents',
-            updateGameInfo: 'game/updateGameInfo',
-            publishGame: 'game/publishGame'
+            updateGameInfo: 'game/updateGameInfo'
         }),
         setGameData() {
             this.game.name = this.name;
@@ -136,6 +166,9 @@ export default {
             this.game.dateStart = this.dateStart;
         },
         async updateGameInfoWrapper() {
+            if (!(await this.v$.$validate())) {
+                return;
+            }
             try{
                 await this.updateGameInfo({
                     gameId: this.$route.params.id,

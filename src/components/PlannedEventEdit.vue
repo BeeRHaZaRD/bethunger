@@ -3,21 +3,29 @@
     <div class="data-form">
         <div class="field p-fluid">
             <label for="eventType">Тип события</label>
-            <AutoComplete v-model="eventType" input-id="eventType" dropdown :suggestions="suggestedEventTypes" optionLabel="name" @complete="search"
-                          :disabled="availableEventTypes.length === 0" :placeholder="availableEventTypes.length === 0 ? 'Нет доступных событий' : ''"/>
+            <Dropdown v-model="eventType" editable :options="availableEventTypes" optionLabel="name"
+                      :class="{'p-invalid': v$.eventType.$error}" :disabled="availableEventTypes.length === 0"
+                      :placeholder="availableEventTypes.length === 0 ? 'Нет доступных событий' : ''"/>
+            <small class="p-error">{{v$.eventType.$errors[0]?.$message}}</small>
         </div>
         <div class="field p-fluid" v-if="type === 'add'">
             <label for="startAt">Время запуска</label>
-            <Calendar v-model="startAt" input-id="startAt" showTime hourFormat="24" :min-date="gameDateStart" :panel-style="{width: '359px'}"/>
+            <Calendar v-model="startAt" input-id="startAt" showTime hourFormat="24" :min-date="gameDateStart"
+                      :panel-style="{width: '359px'}" :class="{'p-invalid': v$.startAt.$error}"/>
+            <small class="p-error">{{v$.startAt.$errors[0]?.$message}}</small>
         </div>
     </div>
-    <Button v-if="type === 'add'" class="mt-4" label="Добавить событие" severity="success" :disabled="!eventType?.id || !startAt" @click="addPlannedEventWrapper"/>
-    <Button v-else-if="type === 'run'" class="mt-4" label="Запустить событие" severity="success" :disabled="!eventType?.id" @click="runPlannedEventWrapper"/>
+    <Button v-if="type === 'add'" class="mt-4" label="Добавить событие" severity="success"
+            :disabled="v$.$error" @click="addPlannedEventWrapper"/>
+    <Button v-else-if="type === 'run'" class="mt-4" label="Запустить событие" severity="success"
+            :disabled="v$.$error" @click="runPlannedEventWrapper"/>
 </template>
 
 <script>
 import {defineComponent} from "vue";
 import {mapActions, mapState} from "vuex";
+import {useVuelidate} from "@vuelidate/core";
+import {required, requiredIf} from "@/utils/localized-validators";
 
 export default defineComponent({
     name: "PlannedEventEdit",
@@ -28,12 +36,24 @@ export default defineComponent({
             required: true
         }
     },
+    setup: () => ({ v$: useVuelidate() }),
     data() {
         return {
             eventType: null,
             startAt: null,
-            availableEventTypes: [],
-            suggestedEventTypes: []
+            availableEventTypes: []
+        }
+    },
+    validations() {
+        return {
+            eventType: {
+                id: {
+                    required: required()
+                }
+            },
+            startAt: {
+                requiredIf: requiredIf(this.type === 'add')
+            }
         }
     },
     computed: {
@@ -55,12 +75,10 @@ export default defineComponent({
             addPlannedEvent: 'game/addPlannedEvent',
             runPlannedEvent: 'game/runPlannedEvent'
         }),
-        search(event) {
-            this.suggestedEventTypes = event.query
-                ? this.availableEventTypes.filter(eventType => eventType.name.toLowerCase().startsWith(event.query.toLowerCase()))
-                : [...this.availableEventTypes];
-        },
         async addPlannedEventWrapper() {
+            if (!(await this.v$.$validate())) {
+                return;
+            }
             try {
                 await this.addPlannedEvent({
                     gameId: this.$route.params.id,
@@ -74,6 +92,9 @@ export default defineComponent({
             }
         },
         async runPlannedEventWrapper() {
+            if (!(await this.v$.$validate())) {
+                return;
+            }
             try {
                 await this.runPlannedEvent({
                     gameId: this.$route.params.id,

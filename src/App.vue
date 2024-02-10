@@ -114,6 +114,10 @@ export default {
     font-variant-numeric: tabular-nums;
 }
 
+.field small {
+    display: block;
+}
+
 .topbar-wrapper {
     position: fixed;
     left: 0;

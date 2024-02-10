@@ -20,8 +20,9 @@
                 <OverlayPanel ref="selectPlayerOp">
                     <div class="field p-fluid mb-1">
                         <label for="player">Игрок</label>
-                        <AutoComplete ref="selectPlayerAc" v-model="playerToAdd" input-id="player" dropdown :suggestions="suggestedPlayers" optionLabel="fullName" @complete="searchPlayer" @item-select="addPlayerWrapper"
-                                      :disabled="availablePlayers.length === 0" :placeholder="availablePlayers.length === 0 ? 'Нет доступных игроков' : ''"/>
+                        <Dropdown v-model="playerToAdd" editable :options="availablePlayers" optionLabel="fullName" @change="selectPlayer"
+                                  :class="{'p-invalid': v$.playerToAdd.$error}" :disabled="availablePlayers.length === 0"
+                                  :placeholder="availablePlayers.length === 0 ? 'Нет доступных игроков' : ''"/>
                     </div>
                 </OverlayPanel>
             </template>
@@ -46,20 +47,31 @@ import {SEX} from "@/enums/enums"
 import PlayerInfo from "@/components/PlayerInfo.vue";
 import PlayerListItem from "@/components/PlayerListItem.vue";
 import PlayerTrainsEdit from "@/components/PlayerTrainsEdit.vue";
-import {getPlayerIndex, openAutoCompleteDropdown} from "@/utils/util";
+import {getPlayerIndex, openDropdown} from "@/utils/util";
+import {useVuelidate} from "@vuelidate/core";
+import {required} from "@/utils/localized-validators";
 
 export default defineComponent({
     name: "PlayerList",
     components: {PlayerTrainsEdit, PlayerListItem, PlayerInfo},
+    setup: () => ({ v$: useVuelidate() }),
     data() {
         return {
             modalPlayerVisible: false,
             modalTrainsEditVisible: false,
             availablePlayers: [],
-            suggestedPlayers: [],
             currentPlayer: null,
             playerToAdd: null,
             currentPlayerOpRef: null
+        }
+    },
+    validations() {
+        return {
+            playerToAdd: {
+                id: {
+                    required: required()
+                }
+            }
         }
     },
     props: {
@@ -103,34 +115,44 @@ export default defineComponent({
             });
             // auto open dropdown
             if (this.availablePlayers.length > 0) {
-                openAutoCompleteDropdown(this.currentPlayerOpRef);
+                openDropdown(this.currentPlayerOpRef);
             }
         },
-        searchPlayer(event) {
-            this.suggestedPlayers = event.query
-                ? this.availablePlayers.filter(player => player.fullName.toLowerCase().includes(event.query.toLowerCase()))
-                : [...this.availablePlayers];
+        selectPlayer(event) {
+            if (this.playerToAdd?.id) {
+                this.addPlayerWrapper(event.originalEvent)
+            }
         },
         async addPlayerWrapper(event) {
-            this.currentPlayerOpRef.toggle(event.originalEvent);
-            await this.addPlayer({
-                gameId: this.$route.params.id,
-                player: this.playerToAdd
-            });
+            if (!(await this.v$.$validate())) {
+                return;
+            }
+            this.currentPlayerOpRef.toggle(event);
+            try {
+                await this.addPlayer({
+                    gameId: this.$route.params.id,
+                    player: this.playerToAdd
+                });
+                this.$toast.add({ severity: 'success', summary: 'Игрок успешно добавлен', life: 3000 });
+            } catch (e) {
+                this.$toast.add({severity: 'error', summary: 'Ошибка добавления игрока', detail: e.response.data.detail, life: 3000});
+            }
             this.resetData();
-            this.$toast.add({ severity: 'success', summary: 'Игрок успешно добавлен', life: 3000 });
         },
         async removePlayerWrapper(player) {
-            await this.removePlayer({
-                gameId: this.$route.params.id,
-                player: player
-            });
-            this.$toast.add({ severity: 'success', summary: 'Игрок успешно удален', life: 3000 });
+            try {
+                await this.removePlayer({
+                    gameId: this.$route.params.id,
+                    player: player
+                });
+                this.$toast.add({severity: 'success', summary: 'Игрок успешно удален', life: 3000});
+            } catch (e) {
+                this.$toast.add({severity: 'error', summary: 'Ошибка удаления игрока', detail: e.response.data.detail, life: 3000});
+            }
         },
         resetData() {
             this.playerToAdd = null;
             this.availablePlayers = [];
-            this.suggestedPlayers = [];
             this.currentPlayerOpRef = null;
         }
     }
