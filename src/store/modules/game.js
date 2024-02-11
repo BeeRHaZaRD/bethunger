@@ -253,7 +253,7 @@ export const game = {
     updateTrainResults({commit}, {player, trainResults}) {
       return axios({
         method: 'put',
-        url: '/players/' + player.id + '/trainResults',
+        url: '/players/' + player.id + '/trainings',
         data: {...trainResults}
       }).then(() => {
         commit('setTrainResults', {player, trainResults});
@@ -264,7 +264,7 @@ export const game = {
     addPlannedEvent({commit}, {gameId, eventTypeId, startAt}) {
       return axios({
         method: 'post',
-        url: '/games/' + gameId + '/plannedEvents',
+        url: '/games/' + gameId + '/planned-events',
         data: {
           eventTypeId: eventTypeId,
           startAt: dateTimeToIso(startAt)
@@ -276,7 +276,7 @@ export const game = {
     runPlannedEvent({commit}, {gameId, eventTypeId}) {
       return axios({
         method: 'post',
-        url: '/games/' + gameId + '/plannedEvents',
+        url: '/games/' + gameId + '/planned-events',
         data: {
           eventTypeId: eventTypeId
         }
@@ -287,7 +287,7 @@ export const game = {
     removePlannedEvent({commit}, {gameId, plannedEvent}) {
       return axios({
         method: 'delete',
-        url: '/games/' + gameId + '/plannedEvents/' + plannedEvent.id
+        url: '/games/' + gameId + '/planned-events/' + plannedEvent.id
       }).then(() => {
         commit('removePlannedEvent', plannedEvent);
       }).catch(e => {
@@ -297,7 +297,7 @@ export const game = {
     fetchHappenedEvents({getters, commit}, {gameId, after}) {
       return axios({
         method: 'get',
-        url: '/games/' + gameId + '/happenedEvents',
+        url: '/games/' + gameId + '/happened-events',
         params: {
           after: after
         }

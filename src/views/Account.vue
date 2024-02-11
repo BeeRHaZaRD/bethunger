@@ -23,7 +23,7 @@
         <OverlayPanel ref="opDeposit">
             <div class="op-content">
                 <p class="op-title">Пополнение счета</p>
-                <InputNumber v-model="depositAmount" class="mr-2" :minFractionDigits="0" :maxFractionDigits="2" :useGrouping="false" :min="10" :max="100000" locale="ru" :input-style="{width: '10rem'}"/>
+                <InputNumber v-model="depositAmount" class="mr-2" :minFractionDigits="0" :maxFractionDigits="2" :useGrouping="false" :min="10" :max="100000" suffix=" &#8381;" :input-style="{width: '10rem'}"/>
                 <Button severity="success" label="Пополнить" @click="depositWrapper"/>
             </div>
         </OverlayPanel>
@@ -39,7 +39,7 @@
 </template>
 
 <script>
-import {mapActions, mapGetters, mapState} from "vuex";
+import {mapActions, mapState} from "vuex";
 
 export default {
     data() {
@@ -59,16 +59,24 @@ export default {
             withdraw: 'account/withdraw'
         }),
         async depositWrapper() {
-            await this.deposit(this.depositAmount);
-            this.depositAmount = null;
+            try {
+                await this.deposit(this.depositAmount);
+                this.$toast.add({ severity: 'success', summary: 'Успешное пополнение', detail: 'Счет пополнен на ' + this.depositAmount + ' Р', life: 5000 });
+            } catch (e) {
+                this.$toast.add({severity: 'error', summary: 'Ошибка пополнения', detail: e.response.data.detail, life: 5000});
+            }
             this.$refs.opDeposit.hide();
-            this.$toast.add({ severity: 'success', summary: 'Успешное пополнение', detail: 'Счет пополнен на ' + this.depositAmount + ' Р', life: 5000 });
+            this.depositAmount = null;
         },
         async withdrawWrapper() {
-            await this.withdraw(this.depositAmount);
-            this.withdrawAmount = null;
+            try {
+                await this.withdraw(this.withdrawAmount);
+                this.$toast.add({ severity: 'success', summary: 'Успешное снятие средств', detail:this.withdrawAmount + ' Р выведены со счета', life: 5000 });
+            } catch (e) {
+                this.$toast.add({severity: 'error', summary: 'Ошибка снятия средств', detail: e.response.data.detail, life: 5000});
+            }
             this.$refs.opWithdraw.hide();
-            this.$toast.add({ severity: 'success', summary: 'Успешное пополнение', detail: 'Средства выведены со счета: ' + this.withdrawAmount + ' Р', life: 5000 });
+            this.withdrawAmount = null;
         }
     }
 }

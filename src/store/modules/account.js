@@ -30,8 +30,6 @@ export const account = {
         }
       }).then(response => {
         commit('setBalance', response.data.balance);
-      }).catch(e => {
-        console.log(e);
       });
     },
     withdraw({commit}, amount) {
@@ -43,8 +41,6 @@ export const account = {
         }
       }).then(response => {
         commit('setBalance', response.data.balance);
-      }).catch(e => {
-        console.log(e);
       });
     }
   }

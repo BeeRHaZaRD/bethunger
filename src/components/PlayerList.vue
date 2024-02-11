@@ -13,7 +13,7 @@
             <div class="district">{{district}}</div>
             <template v-for="(player, sexNum) in players">
                 <PlayerListItem v-if="player" :player="player" :game-status="gameStatus" @select-player="openModal(player)" @remove-player="removePlayerWrapper"/>
-                <Button v-else-if="isEditMode" class="add-player" label="ДОБАВИТЬ" severity="secondary" @click="openOverlay($event, parseInt(district), sexNum)"/>
+                <Button v-else-if="isEditMode && gameStatus === 'DRAFT'" class="add-player" label="ДОБАВИТЬ" severity="secondary" @click="openOverlay($event, parseInt(district), sexNum)"/>
                 <div v-else class="empty p-text-secondary">Нет игрока</div>
 
                 <!-- Добавление игрока -->
@@ -55,6 +55,16 @@ export default defineComponent({
     name: "PlayerList",
     components: {PlayerTrainsEdit, PlayerListItem, PlayerInfo},
     setup: () => ({ v$: useVuelidate() }),
+    props: {
+        playersByDistrict: {
+            type: Object,
+            required: true
+        },
+        gameStatus: {
+            type: String,
+            required: true
+        }
+    },
     data() {
         return {
             modalPlayerVisible: false,
@@ -72,16 +82,6 @@ export default defineComponent({
                     required: required()
                 }
             }
-        }
-    },
-    props: {
-        playersByDistrict: {
-            type: Object,
-            required: true
-        },
-        gameStatus: {
-            type: String,
-            required: true
         }
     },
     computed: {
