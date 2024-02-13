@@ -52,9 +52,15 @@ export function makeFullName(entity) {
   return entity ? (entity.firstName + ' ' + entity.lastName) : null;
 }
 
-export function openDropdown(ref) {
+export function clickDropdown(ref) {
   setTimeout(() => {
-    ref.container.querySelector('.p-dropdown').click();
+    ref.container.querySelector('.p-dropdown .p-inputtext').click();
+  }, 100);
+}
+
+export function focusDropdown(ref) {
+  setTimeout(() => {
+    ref.container.querySelector('.p-dropdown .p-dropdown-trigger').click();
   }, 100);
 }
 

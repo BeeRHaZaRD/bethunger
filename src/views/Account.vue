@@ -63,7 +63,7 @@ export default {
                 await this.deposit(this.depositAmount);
                 this.$toast.add({ severity: 'success', summary: 'Успешное пополнение', detail: 'Счет пополнен на ' + this.depositAmount + ' Р', life: 5000 });
             } catch (e) {
-                this.$toast.add({severity: 'error', summary: 'Ошибка пополнения', detail: e.response.data.detail, life: 5000});
+                this.$toast.add({ severity: 'error', summary: 'Ошибка пополнения', detail: e.response.data.detail, life: 5000 });
             }
             this.$refs.opDeposit.hide();
             this.depositAmount = null;
@@ -73,7 +73,7 @@ export default {
                 await this.withdraw(this.withdrawAmount);
                 this.$toast.add({ severity: 'success', summary: 'Успешное снятие средств', detail:this.withdrawAmount + ' Р выведены со счета', life: 5000 });
             } catch (e) {
-                this.$toast.add({severity: 'error', summary: 'Ошибка снятия средств', detail: e.response.data.detail, life: 5000});
+                this.$toast.add({ severity: 'error', summary: 'Ошибка снятия средств', detail: e.response.data.detail, life: 5000 });
             }
             this.$refs.opWithdraw.hide();
             this.withdrawAmount = null;

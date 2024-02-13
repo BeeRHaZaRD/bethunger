@@ -9,84 +9,67 @@
         <div class="header text-center">Дистрикт</div>
         <div class="header text-center">Мужчина</div>
         <div class="header text-center">Женщина</div>
-        <template v-for="(players, district) in playersByDistrict" :key="district">
+        <template v-for="(pair, district) in players" :key="district">
             <div class="district">{{district}}</div>
-            <template v-for="(player, sexNum) in players">
+            <template v-for="(player, sexNum) in pair">
                 <PlayerListItem v-if="player" :player="player" :game-status="gameStatus" @select-player="openModal(player)" @remove-player="removePlayerWrapper"/>
-                <Button v-else-if="isEditMode && gameStatus === 'DRAFT'" class="add-player" label="ДОБАВИТЬ" severity="secondary" @click="openOverlay($event, parseInt(district), sexNum)"/>
+                <Button v-else-if="isEditMode && gameStatus === 'DRAFT'" class="add-player-btn" label="ДОБАВИТЬ" severity="secondary" @click="openOpSelectPlayer($event, parseInt(district), sexNum)"/>
                 <div v-else class="empty p-text-secondary">Нет игрока</div>
 
                 <!-- Добавление игрока -->
-                <OverlayPanel ref="selectPlayerOp">
-                    <div class="field p-fluid mb-1">
-                        <label for="player">Игрок</label>
-                        <Dropdown v-model="playerToAdd" editable :options="availablePlayers" optionLabel="fullName" @change="selectPlayer"
-                                  :class="{'p-invalid': v$.playerToAdd.$error}" :disabled="availablePlayers.length === 0"
-                                  :placeholder="availablePlayers.length === 0 ? 'Нет доступных игроков' : ''"/>
-                    </div>
+                <OverlayPanel ref="opSelectPlayer">
+                    <PlayerAdd :district="parseInt(district)" :sex="SEX[sexNum]" @select="closeOpSelectPlayer"/>
                 </OverlayPanel>
             </template>
         </template>
     </div>
 
     <!-- Подробная информация об игроке -->
-    <Dialog v-model:visible="modalPlayerVisible" modal :showHeader="false" :dismissableMask="true" @hide="currentPlayer = null">
-        <PlayerInfo :player="currentPlayer" :game-status="gameStatus"/>
+    <Dialog v-model:visible="visibleModals.playerInfo" modal :showHeader="false" :dismissableMask="true" @hide="currentPlayer = null">
+        <PlayerInfo :player="currentPlayer"/>
     </Dialog>
 
     <!-- Изменение результатов тренировок -->
-    <Dialog v-model:visible="modalTrainsEditVisible" modal header="Результаты тренировок" :dismissableMask="true" :draggable="false" @hide="currentPlayer = null">
-        <PlayerTrainsEdit :player="currentPlayer" @close-modal="this.modalTrainsEditVisible = false"/>
+    <Dialog v-model:visible="visibleModals.playerTrainsEdit" modal header="Результаты тренировок" :dismissableMask="true" :draggable="false" @hide="currentPlayer = null">
+        <PlayerTrainsEdit :player="currentPlayer" @success="this.visibleModals.playerTrainsEdit = false"/>
     </Dialog>
 </template>
 
 <script>
 import {defineComponent} from 'vue'
 import {mapGetters, mapActions, mapState} from 'vuex';
-import {SEX} from "@/enums/enums"
 import PlayerInfo from "@/components/PlayerInfo.vue";
 import PlayerListItem from "@/components/PlayerListItem.vue";
 import PlayerTrainsEdit from "@/components/PlayerTrainsEdit.vue";
-import {getPlayerIndex, openDropdown} from "@/utils/util";
-import {useVuelidate} from "@vuelidate/core";
-import {required} from "@/utils/localized-validators";
+import Supply from "@/components/Supply.vue";
+import {getPlayerIndex, focusDropdown} from "@/utils/util";
+import PlayerAdd from "@/components/PlayerAdd.vue";
+import {SEX} from "@/enums/enums";
 
 export default defineComponent({
     name: "PlayerList",
-    components: {PlayerTrainsEdit, PlayerListItem, PlayerInfo},
-    setup: () => ({ v$: useVuelidate() }),
+    components: {PlayerAdd, Supply, PlayerTrainsEdit, PlayerListItem, PlayerInfo},
     props: {
-        playersByDistrict: {
+        players: {
             type: Object,
-            required: true
-        },
-        gameStatus: {
-            type: String,
             required: true
         }
     },
     data() {
         return {
-            modalPlayerVisible: false,
-            modalTrainsEditVisible: false,
-            availablePlayers: [],
+            visibleModals: {
+                playerInfo: false,
+                playerTrainsEdit: false
+            },
+            opSelectPlayerRef: null,
             currentPlayer: null,
-            playerToAdd: null,
-            currentPlayerOpRef: null
-        }
-    },
-    validations() {
-        return {
-            playerToAdd: {
-                id: {
-                    required: required()
-                }
-            }
+            SEX: SEX
         }
     },
     computed: {
         ...mapState({
-            isEditMode: state => state.game.isEditMode
+            isEditMode: state => state.game.isEditMode,
+            gameStatus: state => state.game.status
         }),
         ...mapGetters({
             playersLeft: 'game/playersLeft'
@@ -94,50 +77,24 @@ export default defineComponent({
     },
     methods: {
         ...mapActions({
-            getAvailablePlayers: 'game/getAvailablePlayers',
-            addPlayer: 'game/addPlayer',
             removePlayer: 'game/removePlayer'
         }),
         openModal(player) {
             this.currentPlayer = player;
             if (this.isEditMode) {
-                this.modalTrainsEditVisible = true;
+                this.visibleModals.playerTrainsEdit = true;
             } else {
-                this.modalPlayerVisible = true;
+                this.visibleModals.playerInfo = true;
             }
         },
-        async openOverlay(event, district, sexNum) {
-            this.currentPlayerOpRef = this.$refs.selectPlayerOp[getPlayerIndex(district, sexNum)];
-            this.currentPlayerOpRef.toggle(event);
-            this.availablePlayers = await this.getAvailablePlayers({
-                district: district,
-                sex: SEX[sexNum]
-            });
+        openOpSelectPlayer(event, district, sexNum) {
+            this.opSelectPlayerRef = this.$refs.opSelectPlayer[getPlayerIndex(district, sexNum)];
+            this.opSelectPlayerRef.toggle(event);
             // auto open dropdown
-            if (this.availablePlayers.length > 0) {
-                openDropdown(this.currentPlayerOpRef);
-            }
+            focusDropdown(this.opSelectPlayerRef);
         },
-        selectPlayer(event) {
-            if (this.playerToAdd?.id) {
-                this.addPlayerWrapper(event.originalEvent)
-            }
-        },
-        async addPlayerWrapper(event) {
-            if (!(await this.v$.$validate())) {
-                return;
-            }
-            this.currentPlayerOpRef.toggle(event);
-            try {
-                await this.addPlayer({
-                    gameId: this.$route.params.id,
-                    player: this.playerToAdd
-                });
-                this.$toast.add({ severity: 'success', summary: 'Игрок успешно добавлен', life: 3000 });
-            } catch (e) {
-                this.$toast.add({severity: 'error', summary: 'Ошибка добавления игрока', detail: e.response.data.detail, life: 3000});
-            }
-            this.resetData();
+        closeOpSelectPlayer() {
+            this.opSelectPlayerRef.hide();
         },
         async removePlayerWrapper(player) {
             try {
@@ -145,15 +102,10 @@ export default defineComponent({
                     gameId: this.$route.params.id,
                     player: player
                 });
-                this.$toast.add({severity: 'success', summary: 'Игрок успешно удален', life: 3000});
+                this.$toast.add({ severity: 'success', summary: 'Игрок успешно удален', life: 3000 });
             } catch (e) {
-                this.$toast.add({severity: 'error', summary: 'Ошибка удаления игрока', detail: e.response.data.detail, life: 3000});
+                this.$toast.add({ severity: 'error', summary: 'Ошибка удаления игрока', detail: e.response.data.detail, life: 3000 });
             }
-        },
-        resetData() {
-            this.playerToAdd = null;
-            this.availablePlayers = [];
-            this.currentPlayerOpRef = null;
         }
     }
 })
@@ -191,7 +143,7 @@ export default defineComponent({
     align-items: center;
 }
 
-.add-player {
+.add-player-btn {
     min-height: 70px;
 }
 </style>

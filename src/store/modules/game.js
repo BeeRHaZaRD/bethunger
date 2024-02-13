@@ -1,6 +1,7 @@
 import axios from "@/axios";
 import {dateTimeToString, dateTimeToIso, makeFullName} from "@/utils/util"
 import moment from "moment";
+import store from "@/store";
 
 export const game = {
   namespaced: true,
@@ -95,16 +96,16 @@ export const game = {
       state.plannedEvents.find(_plannedEvent => _plannedEvent.id === plannedEvent.id).status = status;
     },
     addPlayer(state, player) {
-      const sex = player.sex === 'MALE' ? 0 : 1;
-      state.players[player.district][sex] = player;
+      const sexNum = player.sex === 'MALE' ? 0 : 1;
+      state.players[player.district][sexNum] = player;
     },
     removePlayer(state, player) {
-      const sex = player.sex === 'MALE' ? 0 : 1;
-      state.players[player.district][sex] = null;
+      const sexNum = player.sex === 'MALE' ? 0 : 1;
+      state.players[player.district][sexNum] = null;
     },
     setTrainResults(state, {player, trainResults}) {
-      const sex = player.sex === 'MALE' ? 0 : 1;
-      state.players[player.district][sex].trainResults = trainResults;
+      const sexNum = player.sex === 'MALE' ? 0 : 1;
+      state.players[player.district][sexNum].trainResults = trainResults;
     },
     addItem(state, item) {
       state.items.push(item);
@@ -113,8 +114,16 @@ export const game = {
       state.items = state.items.filter(_item => _item.id !== item.id);
     },
     setPlayerStatus(state, {player, status}) {
-      const sex = player.sex === 'MALE' ? 0 : 1;
-      state.players[player.district][sex].status = status;
+      const sexNum = player.sex === 'MALE' ? 0 : 1;
+      state.players[player.district][sexNum].status = status;
+    },
+    setPlayerCooldownTo(state, {player, cooldownTo}) {
+      const sexNum = player.sex === 'MALE' ? 0 : 1;
+      state.players[player.district][sexNum].cooldownTo = cooldownTo;
+    },
+    setItemAvailable(state, {item, available}) {
+      const targetItem = state.items.find(_item => _item.id === item.id);
+      targetItem.available = available;
     }
   },
   actions: {
@@ -255,10 +264,8 @@ export const game = {
         method: 'put',
         url: '/players/' + player.id + '/trainings',
         data: {...trainResults}
-      }).then(() => {
-        commit('setTrainResults', {player, trainResults});
-      }).catch(e => {
-        console.log(e);
+      }).then(response => {
+        commit('setTrainResults', {player, trainResults: response.data});
       });
     },
     addPlannedEvent({commit}, {gameId, eventTypeId, startAt}) {
@@ -315,11 +322,13 @@ export const game = {
               }
               break;
             case 'PLANNED_EVENT':
-              commit('setPlannedEventStatus', {plannedEvent: event.plannedEvent, status: event.plannedEvent.status});
-              // TODO PLANNED_EVENT
+              if (store.getters["currentUser/isManager"] || store.getters["currentUser/isAdmin"]) {
+                commit('setPlannedEventStatus', {plannedEvent: event.plannedEvent, status: event.plannedEvent.status});
+              }
               break;
             case 'SUPPLY':
-              // TODO: SUPPLY
+              commit('setPlayerCooldownTo', {player: event.supply.player, cooldownTo: event.supply.player.cooldownTo});
+              commit('setItemAvailable', {item: event.supply.item, available: false});
               break;
           }
           commit('addHappenedEvent', event);
@@ -340,6 +349,21 @@ export const game = {
         });
       }).catch(e => {
         console.log(e);
+      });
+    },
+    makeSupply({commit}, {playerId, itemId}) {
+      return axios({
+        method: 'post',
+        url: '/supplies',
+        data: {
+          playerId,
+          itemId
+        }
+      }).then(response => {
+        const supply = response.data;
+        commit('setPlayerCooldownTo', {player: supply.player, cooldownTo: supply.player.cooldownTo});
+        commit('setItemAvailable', {item: supply.item, available: false});
+        store.commit('account/subtractMoney', supply.amount);
       });
     }
   }

@@ -8,6 +8,12 @@ export const account = {
   mutations: {
     setBalance(state, balance) {
       state.balance = balance;
+    },
+    addMoney(state, amount) {
+      state.balance = state.balance + amount;
+    },
+    subtractMoney(state, amount) {
+      state.balance = state.balance - amount;
     }
   },
   actions: {

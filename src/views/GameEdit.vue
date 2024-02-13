@@ -59,7 +59,7 @@
                 </div>
             </div>
             <div class="col-12 xl:col-6">
-                <PlayerList :players-by-district="players" :game-status="status"/>
+                <PlayerList :players="players"/>
             </div>
         </div>
 
@@ -177,8 +177,7 @@ export default {
                 this.$router.push('/games/' + this.$route.params.id);
                 this.$toast.add({ severity: 'success', summary: 'Игра успешно обновлена', life: 3000 });
             } catch (e) {
-                const errorData = e.response.data;
-                this.$toast.add({severity: 'error', summary: 'Ошибка при обновлении игры', detail: errorData.detail, life: 3000});
+                this.$toast.add({ severity: 'error', summary: 'Ошибка при обновлении игры', detail: e.response.data.detail, life: 3000 });
             }
         }
     },

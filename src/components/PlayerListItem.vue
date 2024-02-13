@@ -10,12 +10,24 @@
                 <Badge v-if="player.trainResults" value="тренировки"/>
                 <Badge v-else value="тренировки" severity="danger"/>
             </template>
-            <template v-if="gameStatus === 'ONGOING'">
-                <div class="buttons" v-if="player.status !== 'DEAD'">
-                    <Button label="Ставка x1.5" severity="info" @click.stop="$refs.opMakeBet.toggle($event)"/>
+            <template v-else-if="gameStatus === 'PLANNED' || gameStatus === 'ONGOING'">
+                <div v-if="player.status !== 'DEAD'" ref="playerButtons" class="buttons">
+                    <Button v-if="gameStatus === 'PLANNED'" label="Ставка x1.50" severity="info" @click.stop="$refs.opMakeBet.toggle($event)"/>
+                    <Button v-if="gameStatus === 'ONGOING'" label="x1.50" severity="info" disabled/>
 
-                    <Button class="lg:hidden xl:inline-flex" icon="pi pi-box" @click.stop="console.log('supply')"/>
-                    <Button class="hidden lg:inline-flex xl:hidden" label="Спонсировать" icon="pi pi-box" @click.stop="console.log('supply')"/>
+                    <template v-if="gameStatus === 'ONGOING'">
+                        <Button v-if="isSuppliable" icon="pi pi-box" @click="openMakeSupplyOp"/>
+                        <Button v-else disabled>
+                            <div class="flex align-items-end">
+                                <span class="pi pi-box mr-2"></span>
+                                <Countdown :time="msToCooldown" @end="onCountdownEnd" v-slot="{days, hours, minutes, seconds}">
+                                    <span class="monospaced">
+                                        {{ formatCountdown(days, hours, minutes, seconds) }}
+                                    </span>
+                                </Countdown>
+                            </div>
+                        </Button>
+                    </template>
                 </div>
                 <div v-else>
                     <span class="p-text-red">Погиб</span>
@@ -24,20 +36,22 @@
         </div>
         <Button v-if="isEditMode && gameStatus === 'DRAFT'" class="btn-remove" icon="pi pi-times" severity="secondary" text @click.stop="$emit('removePlayer', player)"/>
     </div>
+
+    <OverlayPanel ref="opMakeSupply">
+        <Supply :player="player" @success="closeMakeSupplyOp"/>
+    </OverlayPanel>
 </template>
 
 <script>
 import {PLAYER_STATUS_SEVERITY} from "@/enums/enums";
 import {mapState} from "vuex";
+import Supply from "@/components/Supply.vue";
+import {focusDropdown, formatTimer} from "@/utils/util";
 
 export default {
     name: "PlayerListItem",
+    components: {Supply},
     emits: ['selectPlayer', 'removePlayer'],
-    data() {
-        return {
-            PLAYER_STATUS_SEVERITY: PLAYER_STATUS_SEVERITY,
-        }
-    },
     props: {
         player: {
             type: Object,
@@ -48,14 +62,43 @@ export default {
             required: true
         }
     },
+    data() {
+        return {
+            PLAYER_STATUS_SEVERITY: PLAYER_STATUS_SEVERITY
+        }
+    },
     computed: {
         ...mapState({
             isEditMode: state => state.game.isEditMode
-        })
+        }),
+        isSuppliable() {
+            return this.player.cooldownTo ? new Date(this.player.cooldownTo) < new Date() : true;
+        },
+        msToCooldown() {
+            if (!this.player.cooldownTo) {
+                return null;
+            }
+            return new Date(this.player.cooldownTo) - new Date();
+        }
     },
     methods: {
-        emitSelectPlayer() {
-            this.$emit('selectPlayer', this.player);
+        emitSelectPlayer(event) {
+            if (!this.$refs.playerButtons?.contains(event.target)) {
+                this.$emit('selectPlayer', this.player);
+            }
+        },
+        openMakeSupplyOp(event) {
+            this.$refs.opMakeSupply.toggle(event);
+            focusDropdown(this.$refs.opMakeSupply);
+        },
+        closeMakeSupplyOp() {
+            this.$refs.opMakeSupply.hide();
+        },
+        onCountdownEnd() {
+            this.isSuppliable = true;
+        },
+        formatCountdown(days, hours, minutes, seconds) {
+            return formatTimer(days, hours, minutes, seconds);
         }
     }
 }

@@ -79,7 +79,7 @@
                 </div>
             </div>
             <div class="col-12 xl:col-6">
-                <PlayerList :players-by-district="players" :game-status="status"/>
+                <PlayerList :players="players"/>
             </div>
         </div>
         <Dialog v-model:visible="modalPublishVisible" modal header="Вы действительно хотите оубликовать эту игру?" :style="{width: '600px'}">
@@ -89,7 +89,7 @@
                 <Button label="Отмена" severity="secondary" text class="bg-2" @click="modalPublishVisible = false"/>
             </template>
         </Dialog>
-        <Dialog v-model:visible="modalStartVisible" modal header="Вы действительно хотите запутить эту игру?" :style="{width: '600px'}">
+        <Dialog v-model:visible="modalStartVisible" modal header="Вы действительно хотите запустить эту игру?" :style="{width: '600px'}">
             <p>Внимание: убедитесь, что все готово для запуска игры. Отменить данное действие невозможно!</p>
             <template #footer>
                 <Button label="Запустить" severity="success" @click="startGameWrapper"/>

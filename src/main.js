@@ -7,6 +7,7 @@ import PrimeVue from 'primevue/config';
 import ToastService from 'primevue/toastservice';
 import BadgeDirective from 'primevue/badgedirective';
 import ui from '@/ui';
+import VueCountdown from '@chenfengyuan/vue-countdown';
 
 const app = createApp(App);
 
@@ -18,6 +19,7 @@ app.directive('badge', BadgeDirective);
 ui.components.forEach(component => {
     app.component(component.name, component);
 })
+app.component('Countdown', VueCountdown);
 
 app
     .use(router)

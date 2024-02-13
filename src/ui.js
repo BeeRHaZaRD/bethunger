@@ -17,7 +17,6 @@ import ProgressBar from "primevue/progressbar";
 import ProgressSpinner from 'primevue/progressspinner';
 import Menu from "primevue/menu";
 import Badge from 'primevue/badge';
-import AutoComplete from "primevue/autocomplete";
 import Calendar from "primevue/calendar";
 import Textarea from "primevue/textarea";
 import Slider from "primevue/slider";
@@ -32,7 +31,6 @@ export default {
         OverlayPanel,
         InputText,
         InputNumber,
-        AutoComplete,
         Dropdown,
         Textarea,
         Slider,

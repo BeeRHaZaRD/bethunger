@@ -17,7 +17,11 @@
         </h3>
         <h3>
             <span class="text-color-secondary mr-2">До следующего события:</span>
-            <span v-if="nextPlannedEvent" class="monospaced">{{timeToNextPlannedEvent}}</span>
+            <Countdown v-if="nextPlannedEvent" :time="msToNextEvent" @end="onCountdownEnd" v-slot="{days, hours, minutes, seconds}">
+                <span class="monospaced">
+                    {{ formatCountdown(days, hours, minutes, seconds) }}
+                </span>
+            </Countdown>
             <span v-else>—</span>
         </h3>
     </div>
@@ -37,12 +41,11 @@
 </template>
 
 <script>
-import {defineComponent, watchEffect} from "vue";
-import PlannedEventListItem from "@/components/PlannedEventListItem.vue";
-import {mapActions, mapState} from "vuex";
-import {useTimer} from 'vue-timer-hook';
+import {defineComponent} from "vue";
 import {formatTimer} from "@/utils/util";
+import PlannedEventListItem from "@/components/PlannedEventListItem.vue";
 import PlannedEventEdit from "@/components/PlannedEventEdit.vue";
+import {mapActions, mapState} from "vuex";
 
 export default defineComponent({
     name: "PlannedEventList",
@@ -63,6 +66,7 @@ export default defineComponent({
                 plannedEventRun: false
             },
             nextPlannedEvent: null,
+            msToNextEvent: null,
             timer: null
         }
     },
@@ -73,10 +77,6 @@ export default defineComponent({
         }),
         sortedPlannedEvents() {
             return this.plannedEvents.sort((a,b) => new Date(a.startAt) - new Date(b.startAt));
-        },
-        timeToNextPlannedEvent() {
-            const timer = this.timer;
-            return timer ? formatTimer(timer.days, timer.hours, timer.minutes, timer.seconds) : null;
         }
     },
     methods: {
@@ -90,29 +90,28 @@ export default defineComponent({
             });
             this.$toast.add({ severity: 'success', summary: 'Событие успешно удалено', life: 3000 });
         },
+        setCountdown() {
+            this.nextPlannedEvent = this.getNextPlannedEvent();
+            if (this.nextPlannedEvent) {
+                this.msToNextEvent = new Date(this.nextPlannedEvent.startAt) - new Date();
+            } else {
+                this.msToNextEvent = null;
+            }
+        },
         getNextPlannedEvent() {
             return this.plannedEvents.find(plannedEvent => new Date(plannedEvent.startAt) > new Date());
+        },
+        onCountdownEnd() {
+            this.nextPlannedEvent.status = 'REQUESTED';
+            this.setCountdown();
+        },
+        formatCountdown(days, hours, minutes, seconds) {
+            return formatTimer(days, hours, minutes, seconds);
         }
     },
     mounted() {
         if (this.gameStatus === 'ONGOING') {
-            this.nextPlannedEvent = this.getNextPlannedEvent();
-            if (this.nextPlannedEvent) {
-                const time = new Date(this.nextPlannedEvent.startAt);
-                this.timer = useTimer(time);
-            }
-            watchEffect(() => {
-                if (this.timer?.isExpired) {
-                    this.nextPlannedEvent.status = 'REQUESTED';
-                    this.nextPlannedEvent = this.getNextPlannedEvent();
-                    if (this.nextPlannedEvent) {
-                        const time = new Date(this.getNextPlannedEvent().startAt);
-                        this.timer.restart(time);
-                    } else {
-                        this.timer = null;
-                    }
-                }
-            });
+            this.setCountdown();
         }
     }
 })

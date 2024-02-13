@@ -69,9 +69,9 @@ export default defineComponent({
                     item: this.item
                 });
                 this.$emit('success');
-                this.$toast.add({severity: 'success', summary: 'Предмет успешно добавлен', life: 3000});
+                this.$toast.add({ severity: 'success', summary: 'Предмет успешно добавлен', life: 3000 });
             } catch (e) {
-                this.$toast.add({severity: 'error', summary: 'Ошибка добавления предмета', detail: e.response.data.detail, life: 3000});
+                this.$toast.add({ severity: 'error', summary: 'Ошибка добавления предмета', detail: e.response.data.detail, life: 3000 });
             }
         }
     },

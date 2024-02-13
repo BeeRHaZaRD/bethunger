@@ -67,7 +67,7 @@ export default defineComponent({
                 this.$emit('success', game);
                 this.$toast.add({ severity: 'success', summary: 'Игра успешно создана', life: 3000 });
             } catch (e) {
-                this.$toast.add({severity: 'error', summary: 'Ошибка создания игры', detail: e.response.data.detail, life: 3000});
+                this.$toast.add({ severity: 'error', summary: 'Ошибка создания игры', detail: e.response.data.detail, life: 3000 });
             }
         }
     },

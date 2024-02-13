@@ -31,7 +31,7 @@ import {SEX_NAME, TRAIN_RESULTS_NAME} from "@/enums/enums";
 
 export default {
     name: "PlayerTrainsEdit",
-    emits: ['closeModal'],
+    emits: ['success'],
     props: {
         player: {
             type: Object,
@@ -59,12 +59,16 @@ export default {
             updateTrainResults: 'game/updateTrainResults'
         }),
         async updateTrainResultsWrapper() {
-            await this.updateTrainResults({
-                player: {...this.player},
-                trainResults: {...this.trainResults}
-            });
-            this.$emit('closeModal');
-            this.$toast.add({ severity: 'success', summary: 'Тренировки успешно обновлены', life: 3000 });
+            try {
+                await this.updateTrainResults({
+                    player: {...this.player},
+                    trainResults: {...this.trainResults}
+                });
+                this.$emit('success');
+                this.$toast.add({ severity: 'success', summary: 'Тренировки успешно обновлены', life: 3000 });
+            } catch (e) {
+                this.$toast.add({ severity: 'error', summary: 'Ошибка обновления тренировок', detail: e.response.data.detail, life: 3000 });
+            }
         },
     },
     async mounted() {

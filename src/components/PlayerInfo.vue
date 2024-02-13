@@ -35,7 +35,7 @@
         </div>
         <div class="section-items mt-5">
             <!-- TODO received items -->
-            <ItemList :items="[]" title="Полученные предметы"/>
+            <ItemList :items="items" title="Полученные предметы"/>
         </div>
         <div class="section-events">
             <HappenedEventList :events="happenedEvents" title="Связанные события"/>
@@ -57,10 +57,6 @@ export default defineComponent({
         player: {
             type: Object,
             required: true
-        },
-        gameStatus: {
-            type: String,
-            required: true
         }
     },
     data() {
@@ -69,18 +65,29 @@ export default defineComponent({
             PLAYER_STATUS_SEVERITY: PLAYER_STATUS_SEVERITY,
             TRAIN_RESULTS_NAME: TRAIN_RESULTS_NAME,
             SEX_NAME: SEX_NAME,
-            happenedEvents: []
+            happenedEvents: [],
+            items: []
         }
     },
     computed: {
         ...mapState({
-            gameHappenedEvents: state => state.game.happenedEvents,
+            gameStatus: state => state.game.status,
+            gameHappenedEvents: state => state.game.happenedEvents
         }),
     },
     async mounted() {
-        this.happenedEvents = this.gameHappenedEvents.filter(event =>
-            (event.type === 'PLAYER' || event.type === 'OTHER') && event.player?.id === this.player.id
-        );
+        this.happenedEvents = this.gameHappenedEvents.filter(event => {
+            switch (event.type) {
+                case 'PLAYER':
+                case 'OTHER':
+                    return event.player?.id === this.player.id;
+                case 'SUPPLY':
+                    return event.supply.player.id === this.player.id;
+            }
+        });
+        this.items = this.happenedEvents
+            .filter(event => event.type === 'SUPPLY')
+            .map(event => event.supply.item);
     }
 })
 </script>
@@ -99,7 +106,7 @@ export default defineComponent({
     "info events"
     "trains events"
     "items events";
-    min-width: 1100px;
+    width: 1100px;
 }
 
 .player-card.full .section-info {
