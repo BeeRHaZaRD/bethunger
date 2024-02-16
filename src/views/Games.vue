@@ -76,10 +76,11 @@ export default {
         }
     },
     async mounted() {
-        const games = await this.getAllGames();
-        this.games.push(...games);
+        try {
+            const games = await this.getAllGames();
+            this.games.push(...games);
+        } catch {}
     }
-
 }
 </script>
 

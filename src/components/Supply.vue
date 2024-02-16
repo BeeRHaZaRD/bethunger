@@ -1,5 +1,5 @@
 <template>
-    <div class="supply">
+    <div class="make-supply">
         <div class="field p-fluid">
             <Dropdown v-model="item" :options="availableItems" optionLabel="name" :disabled="availableItems.length === 0"
                       :placeholder="availableItems.length === 0 ? 'Нет доступных предметов' : 'Выберите предмет'"/>
@@ -59,7 +59,7 @@ export default defineComponent({
 </script>
 
 <style scoped>
-.supply {
+.make-supply {
     min-width: 200px;
 }
 

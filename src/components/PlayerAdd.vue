@@ -44,7 +44,7 @@ export default defineComponent({
     },
     methods: {
         ...mapActions({
-            getAvailablePlayers: 'game/getAvailablePlayers',
+            getAvailablePlayers: 'commons/getAvailablePlayers',
             addPlayer: 'game/addPlayer',
         }),
         selectPlayer(event) {
@@ -54,9 +54,7 @@ export default defineComponent({
             }
         },
         async addPlayerWrapper() {
-            if (!(await this.v$.$validate())) {
-                return;
-            }
+            if (await this.v$.$validate() === false) return;
             try {
                 await this.addPlayer({
                     gameId: this.$route.params.id,
@@ -69,10 +67,14 @@ export default defineComponent({
         }
     },
     async mounted() {
-        this.availablePlayers = await this.getAvailablePlayers({
-            district: this.district,
-            sex: this.sex
-        });
+        try {
+            this.availablePlayers = await this.getAvailablePlayers({
+                district: this.district,
+                sex: this.sex
+            });
+        } catch (e) {
+            this.$toast.add({ severity: 'error', summary: 'Ошибка загрузки игроков', detail: e.response.data.detail, life: 3000 });
+        }
     }
 })
 </script>

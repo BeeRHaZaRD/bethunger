@@ -12,15 +12,24 @@ export const requiredIf = (cond) =>
 
 export const minLength = (min) =>
     helpers.withMessage(
-        `минимум ${min} ${wordCase(min, ['символ', 'символа', 'символов'])}`,
+        `Минимум ${min} ${wordCase(min, ['символ', 'символа', 'символов'])}`,
         validators.minLength(min)
     );
 
 export const maxLength = (max) =>
     helpers.withMessage(
-        `максимум ${max} ${wordCase(max, ['символ', 'символа', 'символов'])}`,
+        `Максимум ${max} ${wordCase(max, ['символ', 'символа', 'символов'])}`,
         validators.maxLength(max)
     );
 
+export const minValue = (value, unit = '') =>
+    helpers.withMessage(`Минимум ${value} ${unit}`, validators.minValue(value));
+
+export const maxValue = (value, unit = '') =>
+    helpers.withMessage(`Максимум ${value} ${unit}`, validators.maxValue(value));
+
 export const alphaNum = () =>
     helpers.withMessage('Только латинские буквы и цифры', validators.alphaNum);
+
+export const sameAs = (value) =>
+    helpers.withMessage('Пароли должны совпадать', validators.sameAs(value));

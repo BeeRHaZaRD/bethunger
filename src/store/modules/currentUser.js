@@ -33,22 +33,33 @@ export const currentUser = {
       state.lastName = null;
       state.role = null;
       state.isAuthorized = false;
-    },
-    setIsAuthorized(state, isAuthorized) {
-      state.isAuthorized = isAuthorized;
     }
   },
   actions: {
+    register({commit, dispatch}, {username, password, firstName, lastName}) {
+      return axios({
+        method: 'post',
+        url: '/auth/register',
+        data: {
+          username,
+          password,
+          firstName,
+          lastName
+        }
+      }).then(response => {
+        localStorage.setItem('authToken', JSON.stringify(response.data.token));
+        localStorage.setItem('currentUser', JSON.stringify(response.data.user));
+        dispatch('setAxiosToken', response.data.token);
+        commit('setUser', response.data.user);
+      });
+    },
     login({commit, dispatch}, {username, password}) {
       return axios({
         method: 'post',
         url: '/auth/login',
         data: {
-          username: username,
-          password: password
-        },
-        headers: {
-          'Content-Type': 'application/json'
+          username,
+          password
         }
       }).then(response => {
         localStorage.setItem('authToken', JSON.stringify(response.data.token));
@@ -62,7 +73,7 @@ export const currentUser = {
       localStorage.removeItem('authToken');
       dispatch('clearAxiosToken');
       commit('resetUser');
-      router.push('/auth/login');
+      router.push('/auth');
     },
     setAxiosToken(_, authToken) {
       axios.defaults.headers.common['Authorization'] = 'Bearer ' + authToken;

@@ -24,7 +24,7 @@
             <div class="op-content">
                 <p class="op-title">Пополнение счета</p>
                 <InputNumber v-model="depositAmount" class="mr-2" :minFractionDigits="0" :maxFractionDigits="2" :useGrouping="false" :min="10" :max="100000" suffix=" &#8381;" :input-style="{width: '10rem'}"/>
-                <Button severity="success" label="Пополнить" @click="depositWrapper"/>
+                <Button severity="success" label="Пополнить" :disabled="!depositAmount" @click="requestDeposit"/>
             </div>
         </OverlayPanel>
 
@@ -32,14 +32,14 @@
             <div class="op-content">
                 <p class="op-title">Вывод средств</p>
                 <InputNumber v-model="withdrawAmount" class="mr-2" :minFractionDigits="0" :maxFractionDigits="2" :useGrouping="false" :min="10" :max="100000" suffix=" &#8381;" :input-style="{width: '10rem'}"/>
-                <Button severity="success" label="Вывести" @click="withdrawWrapper"/>
+                <Button severity="success" label="Вывести" :disabled="!withdrawAmount" @click="requestWithdraw"/>
             </div>
         </OverlayPanel>
     </div>
 </template>
 
 <script>
-import {mapActions, mapState} from "vuex";
+import {mapState} from "vuex";
 
 export default {
     data() {
@@ -54,29 +54,11 @@ export default {
         })
     },
     methods: {
-        ...mapActions({
-            deposit: 'account/deposit',
-            withdraw: 'account/withdraw'
-        }),
-        async depositWrapper() {
-            try {
-                await this.deposit(this.depositAmount);
-                this.$toast.add({ severity: 'success', summary: 'Успешное пополнение', detail: 'Счет пополнен на ' + this.depositAmount + ' Р', life: 5000 });
-            } catch (e) {
-                this.$toast.add({ severity: 'error', summary: 'Ошибка пополнения', detail: e.response.data.detail, life: 5000 });
-            }
-            this.$refs.opDeposit.hide();
-            this.depositAmount = null;
+        requestDeposit() {
+            this.$router.push(`/payment?action=deposit&amount=${this.depositAmount}`);
         },
-        async withdrawWrapper() {
-            try {
-                await this.withdraw(this.withdrawAmount);
-                this.$toast.add({ severity: 'success', summary: 'Успешное снятие средств', detail:this.withdrawAmount + ' Р выведены со счета', life: 5000 });
-            } catch (e) {
-                this.$toast.add({ severity: 'error', summary: 'Ошибка снятия средств', detail: e.response.data.detail, life: 5000 });
-            }
-            this.$refs.opWithdraw.hide();
-            this.withdrawAmount = null;
+        requestWithdraw() {
+            this.$router.push(`/payment?action=withdraw&amount=${this.withdrawAmount}`);
         }
     }
 }

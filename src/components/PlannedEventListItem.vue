@@ -1,6 +1,6 @@
 <template>
     <div class="planned-event">
-        <div class="date-start">{{startAtView}}</div>
+        <div class="date-start">{{dateStartString}}</div>
         <div class="info">
             <div class="name">
                 <span>{{plannedEvent.eventType.name}}</span>
@@ -37,7 +37,7 @@ export default defineComponent({
         ...mapState({
             isEditMode: state => state.game.isEditMode
         }),
-        startAtView() {
+        dateStartString() {
             return this.plannedEvent.startAt ? moment(this.plannedEvent.startAt).format('HH:mm DD.MM') : null;
         }
     }
@@ -64,7 +64,7 @@ export default defineComponent({
     position: absolute;
     width: 2px;
     top: 0;
-    left: 65px;
+    left: calc(5rem - 1px);
     bottom: -14px;
     background-color: var(--primary-color);
 }
@@ -83,15 +83,16 @@ export default defineComponent({
     width: 10px;
     height: 10px;
     top: calc(50% - 5px);
-    left: 61px;
+    left: calc(5rem - 5px);
     border-radius: 50%;
     border: 2px solid var(--bg-2);
     background-color: #fff;
 }
 
 .planned-event .date-start {
-    width: 40px;
     text-align: center;
+    flex-basis: 3rem;
+    flex-shrink: 0;
 }
 
 .planned-event .info .name {

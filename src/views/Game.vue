@@ -96,13 +96,6 @@
                 <Button label="Отмена" severity="secondary" text class="bg-2" @click="modalStartVisible = false"/>
             </template>
         </Dialog>
-        <OverlayPanel ref="opMakeBet">
-            <div class="op-content">
-                <p class="op-title">Ставка</p>
-                <InputNumber v-model="betSum" class="bet-sum" :minFractionDigits="0" :maxFractionDigits="2" :useGrouping="false" :min="10" :max="1000000" suffix=" &#8381;"/>
-                <Button severity="success" label="Поставить"/>
-            </div>
-        </OverlayPanel>
     </div>
     <div v-else class="content-center">
         <ProgressSpinner strokeWidth="2"/>
@@ -117,7 +110,7 @@ import PlayerInfo from "@/components/PlayerInfo.vue";
 import ItemList from "@/components/ItemList.vue";
 import HappenedEventList from "@/components/HappenedEventList.vue";
 import PlannedEventList from "@/components/PlannedEventList.vue";
-import {dateTimeToIso, dateTimeToString, formatTimer} from "@/utils/util";
+import {dateTimeToIso, dateTimeToString, formatTime} from "@/utils/util";
 import {isGameInfoValid, isPlayersTrainResultsFull} from "@/utils/validations";
 import {useStopwatch} from 'vue-timer-hook';
 import moment from "moment/moment";
@@ -164,11 +157,11 @@ export default {
         },
         durationString() {
             const duration = moment.duration(this.duration, 'seconds');
-            return formatTimer(duration.days(), duration.hours(), duration.minutes(), duration.seconds());
+            return formatTime(duration.days(), duration.hours(), duration.minutes(), duration.seconds());
         },
         timeLeft() {
             const timer = this.timer;
-            return formatTimer(timer.days, timer.hours, timer.minutes, timer.seconds);
+            return formatTime(timer.days, timer.hours, timer.minutes, timer.seconds);
         },
     },
     watch: {
@@ -290,10 +283,6 @@ export default {
 
 .section-info .data-list {
     grid-template-columns: auto;
-}
-
-.bet-sum {
-    margin-right: 0.5rem;
 }
 
 /* Medium */

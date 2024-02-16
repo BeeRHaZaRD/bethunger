@@ -11,7 +11,7 @@
         <div class="field p-fluid" v-if="type === 'add'">
             <label for="startAt">Время запуска</label>
             <Calendar v-model="startAt" input-id="startAt" showTime hourFormat="24" :min-date="gameDateStart"
-                      :panel-style="{width: '359px'}" :class="{'p-invalid': v$.startAt.$error}"/>
+                      :panel-style="{width: '19rem'}" :class="{'p-invalid': v$.startAt.$error}"/>
             <small class="p-error">{{v$.startAt.$errors[0]?.$message}}</small>
         </div>
     </div>
@@ -76,9 +76,7 @@ export default defineComponent({
             runPlannedEvent: 'game/runPlannedEvent'
         }),
         async addPlannedEventWrapper() {
-            if (!(await this.v$.$validate())) {
-                return;
-            }
+            if (await this.v$.$validate() === false) return;
             try {
                 await this.addPlannedEvent({
                     gameId: this.$route.params.id,
@@ -92,9 +90,7 @@ export default defineComponent({
             }
         },
         async runPlannedEventWrapper() {
-            if (!(await this.v$.$validate())) {
-                return;
-            }
+            if (await this.v$.$validate() === false) return;
             try {
                 await this.runPlannedEvent({
                     gameId: this.$route.params.id,

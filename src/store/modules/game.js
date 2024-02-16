@@ -148,8 +148,6 @@ export const game = {
           game.manager.fullName = game.manager ? (game.manager.firstName + ' ' + game.manager.lastName) : null;
           return game;
         });
-      }).catch(e => {
-        console.log(e);
       });
     },
     createGame(_, {name, managerId}) {
@@ -177,8 +175,6 @@ export const game = {
           arenaDescription: game.arenaDescription,
           dateStart: dateTimeToIso(game.dateStart)
         }
-      }).catch(e => {
-        console.log(e);
       });
     },
     publishGame({commit}, gameId) {
@@ -197,16 +193,6 @@ export const game = {
         commit('setStatus', 'ONGOING');
       });
     },
-    getAllItems() {
-      return axios({
-        method: 'get',
-        url: '/items'
-      }).then(response => {
-        return response.data;
-      }).catch(e => {
-        console.log(e);
-      });
-    },
     addItem({commit}, {gameId, item}) {
       return axios({
         method: 'post',
@@ -221,22 +207,6 @@ export const game = {
         url: '/games/' + gameId + '/items/' + item.id
       }).then(() => {
         commit('removeItem', item);
-      }).catch(e => {
-        console.log(e);
-      });
-    },
-    getAvailablePlayers({}, {district, sex}) {
-      return axios({
-        method: 'get',
-        url: '/players/available',
-        params: {district, sex}
-      }).then(response => {
-        return response.data.map(player => {
-          player.fullName = makeFullName(player);
-          return player;
-        });
-      }).catch(e => {
-        console.log(e);
       });
     },
     addPlayer({commit}, {gameId, player}) {
@@ -255,17 +225,6 @@ export const game = {
         url: '/games/' + gameId + '/players/' + player.id
       }).then(() => {
         commit('removePlayer', player);
-      }).catch(e => {
-        console.log(e);
-      });
-    },
-    updateTrainResults({commit}, {player, trainResults}) {
-      return axios({
-        method: 'put',
-        url: '/players/' + player.id + '/trainings',
-        data: {...trainResults}
-      }).then(response => {
-        commit('setTrainResults', {player, trainResults: response.data});
       });
     },
     addPlannedEvent({commit}, {gameId, eventTypeId, startAt}) {
@@ -297,8 +256,6 @@ export const game = {
         url: '/games/' + gameId + '/planned-events/' + plannedEvent.id
       }).then(() => {
         commit('removePlannedEvent', plannedEvent);
-      }).catch(e => {
-        console.log(e);
       });
     },
     fetchHappenedEvents({getters, commit}, {gameId, after}) {
@@ -333,22 +290,6 @@ export const game = {
           }
           commit('addHappenedEvent', event);
         }
-      });
-    },
-    getAllManagers() {
-      return axios({
-        method: 'get',
-        url: '/users',
-        params: {
-          role: 'MANAGER'
-        }
-      }).then(response => {
-        return response.data.map(manager => {
-          manager.fullName = manager.firstName + ' ' + manager.lastName;
-          return manager;
-        });
-      }).catch(e => {
-        console.log(e);
       });
     },
     makeSupply({commit}, {playerId, itemId}) {

@@ -56,7 +56,7 @@ export default {
     },
     methods: {
         ...mapActions({
-            updateTrainResults: 'game/updateTrainResults'
+            updateTrainResults: 'commons/updateTrainResults'
         }),
         async updateTrainResultsWrapper() {
             try {

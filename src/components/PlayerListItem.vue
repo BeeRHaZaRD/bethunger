@@ -12,7 +12,7 @@
             </template>
             <template v-else-if="gameStatus === 'PLANNED' || gameStatus === 'ONGOING'">
                 <div v-if="player.status !== 'DEAD'" ref="playerButtons" class="buttons">
-                    <Button v-if="gameStatus === 'PLANNED'" label="Ставка x1.50" severity="info" @click.stop="$refs.opMakeBet.toggle($event)"/>
+                    <Button v-if="gameStatus === 'PLANNED'" label="Ставка x1.50" severity="info" @click="openMakeBetOp"/>
                     <Button v-if="gameStatus === 'ONGOING'" label="x1.50" severity="info" disabled/>
 
                     <template v-if="gameStatus === 'ONGOING'">
@@ -37,6 +37,9 @@
         <Button v-if="isEditMode && gameStatus === 'DRAFT'" class="btn-remove" icon="pi pi-times" severity="secondary" text @click.stop="$emit('removePlayer', player)"/>
     </div>
 
+    <OverlayPanel ref="opMakeBet">
+        <Bet :player="player" :coefficient="2.7"/>
+    </OverlayPanel>
     <OverlayPanel ref="opMakeSupply">
         <Supply :player="player" @success="closeMakeSupplyOp"/>
     </OverlayPanel>
@@ -46,11 +49,12 @@
 import {PLAYER_STATUS_SEVERITY} from "@/enums/enums";
 import {mapState} from "vuex";
 import Supply from "@/components/Supply.vue";
-import {focusDropdown, formatTimer} from "@/utils/util";
+import {focusDropdown, formatTime} from "@/utils/util";
+import Bet from "@/components/Bet.vue";
 
 export default {
     name: "PlayerListItem",
-    components: {Supply},
+    components: {Bet, Supply},
     emits: ['selectPlayer', 'removePlayer'],
     props: {
         player: {
@@ -94,12 +98,16 @@ export default {
         closeMakeSupplyOp() {
             this.$refs.opMakeSupply.hide();
         },
+        openMakeBetOp(event) {
+            this.$refs.opMakeBet.toggle(event);
+        },
+        closeMakeBetOp() {
+            this.$refs.opMakeBet.hide();
+        },
         onCountdownEnd() {
             this.isSuppliable = true;
         },
-        formatCountdown(days, hours, minutes, seconds) {
-            return formatTimer(days, hours, minutes, seconds);
-        }
+        formatCountdown: formatTime
     }
 }
 </script>

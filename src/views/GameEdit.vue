@@ -43,7 +43,7 @@
                         <div class="field">
                             <label for="gameUpdateDateStart">Время начала</label>
                             <Calendar v-model="game.dateStart" input-id="gameUpdateDateStart" showTime hourFormat="24" manual-input :min-date="new Date()"
-                                      :panel-style="{width: '359px'}" :class="{'p-invalid': v$.game.dateStart.$error}"/>
+                                      :panel-style="{width: '19rem'}" :class="{'p-invalid': v$.game.dateStart.$error}"/>
                             <small class="p-error">{{v$.game.dateStart.$errors[0]?.$message}}</small>
                         </div>
                         <Button class="w-full mt-2" label="Сохранить" severity="success" :disabled="!game.name.trim()" @click="updateGameInfoWrapper"/>
@@ -166,9 +166,7 @@ export default {
             this.game.dateStart = this.dateStart;
         },
         async updateGameInfoWrapper() {
-            if (!(await this.v$.$validate())) {
-                return;
-            }
+            if (await this.v$.$validate() === false) return;
             try{
                 await this.updateGameInfo({
                     gameId: this.$route.params.id,

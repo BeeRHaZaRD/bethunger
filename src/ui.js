@@ -10,6 +10,8 @@ import Dialog from 'primevue/dialog';
 import OverlayPanel from 'primevue/overlaypanel';
 import InputText from "primevue/inputtext";
 import InputNumber from 'primevue/inputnumber';
+import Dropdown from "primevue/dropdown";
+import Textarea from "primevue/textarea";
 import Toast from 'primevue/toast';
 import Tag from "primevue/tag";
 import Avatar from "primevue/avatar";
@@ -18,9 +20,10 @@ import ProgressSpinner from 'primevue/progressspinner';
 import Menu from "primevue/menu";
 import Badge from 'primevue/badge';
 import Calendar from "primevue/calendar";
-import Textarea from "primevue/textarea";
 import Slider from "primevue/slider";
-import Dropdown from "primevue/dropdown";
+import TabView from "primevue/tabview";
+import TabPanel from "primevue/tabpanel";
+import InputMask from "primevue/inputmask";
 
 export default {
     components: [
@@ -31,6 +34,7 @@ export default {
         OverlayPanel,
         InputText,
         InputNumber,
+        InputMask,
         Dropdown,
         Textarea,
         Slider,
@@ -41,7 +45,9 @@ export default {
         ProgressBar,
         ProgressSpinner,
         Menu,
-        Badge
+        Badge,
+        TabView,
+        TabPanel
     ],
     config: {
         locale: {

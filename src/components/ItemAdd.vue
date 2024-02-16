@@ -56,13 +56,11 @@ export default defineComponent({
     },
     methods: {
         ...mapActions({
-            getAllItems: 'game/getAllItems',
+            getAllItems: 'commons/getAllItems',
             addItem: 'game/addItem'
         }),
         async addItemWrapper() {
-            if (!(await this.v$.$validate())) {
-                return;
-            }
+            if (await this.v$.$validate() === false) return;
             try {
                 await this.addItem({
                     gameId: this.$route.params.id,
@@ -76,9 +74,13 @@ export default defineComponent({
         }
     },
     async mounted() {
-        const items = await this.getAllItems();
-        // filter already added items
-        this.availableItems = items.filter(item => !this.addedItems.some(addedItem => addedItem.id === item.id));
+        try {
+            const items = await this.getAllItems();
+            // filter already added items
+            this.availableItems = items.filter(item => !this.addedItems.some(addedItem => addedItem.id === item.id));
+        } catch (e) {
+            this.$toast.add({ severity: 'error', summary: 'Ошибка загрузки предметов', detail: e.response.data.detail, life: 3000 });
+        }
     }
 })
 </script>

@@ -3,12 +3,13 @@
         <div class="key monospaced">{{happenedAt}}</div>
         <div class="value" v-if="event.playerEventType === 'KILLED'">
             <span class="p-text-primary">{{playerFullName}}&nbsp;</span>
-            <span class="p-text-red">погиб</span>
+            <span class="p-text-red">{{wordFormByGender(event.player.sex, 'погиб', 'погибла')}}</span>
         </div>
         <div class="value" v-else>
             <span class="p-text-primary">{{playerFullName}}&nbsp;</span>
-            <span>получил {{INJURY_DEGREE[event.playerEventType]}}&nbsp;</span>
-            <span class="p-text-red">ранение&nbsp;</span>
+            <span>{{wordFormByGender(event.player.sex, 'получил', 'получила')}}&nbsp;</span>
+            <span>{{INJURY_DEGREE[event.playerEventType]}}&nbsp;</span>
+            <span class="p-text-red">ранение</span>
         </div>
     </template>
     <template v-if="event.type === 'PLANNED_EVENT'">
@@ -23,7 +24,8 @@
         <div class="key monospaced">{{happenedAt}}</div>
         <div class="value">
             <span class="p-text-primary">{{event.supply.player.firstName + ' ' + event.supply.player.lastName}}&nbsp;</span>
-            <span>получил от спонсора&nbsp;</span>
+            <span>{{wordFormByGender(event.supply.player.sex, 'получил', 'получила')}}&nbsp;</span>
+            <span>от спонсора&nbsp;</span>
             <span class="p-text-purple">{{event.supply.item.name}}</span>
         </div>
     </template>
@@ -39,8 +41,8 @@
 <script>
 import {defineComponent} from 'vue'
 import {INJURY_DEGREE} from "@/enums/enums";
+import {makeFullName, wordFormByGender} from "@/utils/util";
 import moment from "moment";
-import {makeFullName} from "@/utils/util";
 
 export default defineComponent({
     name: "HappenedEventListItem",
@@ -62,6 +64,9 @@ export default defineComponent({
         playerFullName() {
             return makeFullName(this.event.player);
         }
+    },
+    methods: {
+        wordFormByGender: wordFormByGender
     }
 })
 </script>

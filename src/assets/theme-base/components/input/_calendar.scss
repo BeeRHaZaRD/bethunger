@@ -120,10 +120,8 @@
 
         button {
             @include action-icon();
-
-            &:last-child {
-                margin-top: .2em;
-            }
+            width: 1.75rem;
+            height: 1.7rem;
         }
 
         span {
@@ -132,6 +130,10 @@
 
         > div {
             padding: $calendarTimePickerElementPadding;
+        }
+
+        .p-separator {
+            margin-top: -1px;
         }
     }
 

@@ -385,7 +385,7 @@ $calendarHeaderFontWeight: 600;
 
 /// Padding of a calendar weekday cell
 /// @group form
-$calendarHeaderCellPadding: .5rem;
+$calendarHeaderCellPadding: .25rem;
 
 /// Text color of current month and year text in hover state
 /// @group form
@@ -393,15 +393,15 @@ $calendarMonthYearHeaderHoverTextColor: $primaryColor !default;
 
 /// Padding of a calendar date cell
 /// @group form
-$calendarCellDatePadding: .5rem;
+$calendarCellDatePadding: .25rem;
 
 /// Width of a calendar date cell
 /// @group form
-$calendarCellDateWidth: 2.5rem;
+$calendarCellDateWidth: 2rem;
 
 /// Height of a calendar date cell
 /// @group form
-$calendarCellDateHeight: 2.5rem;
+$calendarCellDateHeight: 2rem;
 
 /// Border radius of a calendar date cell
 /// @group form
@@ -433,15 +433,15 @@ $calendarButtonBarPadding: 1rem 0;
 
 /// Padding of a time picker container of a calendar
 /// @group form
-$calendarTimePickerPadding: .5rem;
+$calendarTimePickerPadding: .5rem 0 0 0;
 
 /// Padding of a time picker element of a calendar
 /// @group form
-$calendarTimePickerElementPadding: 0 .429rem;
+$calendarTimePickerElementPadding: 0 .25rem;
 
 /// Font size of a time picker element of a calendar
 /// @group form
-$calendarTimePickerTimeFontSize: 1.286rem;
+$calendarTimePickerTimeFontSize: 1rem;
 
 /// Breakpoint of calendar to apply styles for small screens like phones
 /// @group form

@@ -42,7 +42,7 @@
 
 <script>
 import {defineComponent} from "vue";
-import {formatTimer} from "@/utils/util";
+import {formatTime} from "@/utils/util";
 import PlannedEventListItem from "@/components/PlannedEventListItem.vue";
 import PlannedEventEdit from "@/components/PlannedEventEdit.vue";
 import {mapActions, mapState} from "vuex";
@@ -84,11 +84,15 @@ export default defineComponent({
             removePlannedEvent: 'game/removePlannedEvent'
         }),
         async removePlannedEventWrapper(plannedEvent) {
-            await this.removePlannedEvent({
-                gameId: this.$route.params.id,
-                plannedEvent: plannedEvent
-            });
-            this.$toast.add({ severity: 'success', summary: 'Событие успешно удалено', life: 3000 });
+            try {
+                await this.removePlannedEvent({
+                    gameId: this.$route.params.id,
+                    plannedEvent: plannedEvent
+                });
+                this.$toast.add({severity: 'success', summary: 'Событие успешно удалено', life: 3000});
+            } catch (e) {
+                this.$toast.add({ severity: 'error', summary: 'Ошибка удаления события', detail: e.response.data.detail, life: 3000 });
+            }
         },
         setCountdown() {
             this.nextPlannedEvent = this.getNextPlannedEvent();
@@ -105,9 +109,7 @@ export default defineComponent({
             this.nextPlannedEvent.status = 'REQUESTED';
             this.setCountdown();
         },
-        formatCountdown(days, hours, minutes, seconds) {
-            return formatTimer(days, hours, minutes, seconds);
-        }
+        formatCountdown: formatTime
     },
     mounted() {
         if (this.gameStatus === 'ONGOING') {

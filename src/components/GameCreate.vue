@@ -52,13 +52,11 @@ export default defineComponent({
     },
     methods: {
         ...mapActions({
-            getAllManagers: 'game/getAllManagers',
+            getAllManagers: 'commons/getAllManagers',
             createGame: 'game/createGame'
         }),
         async createGameWrapper() {
-            if (!(await this.v$.$validate())) {
-                return;
-            }
+            if (await this.v$.$validate() === false) return;
             try {
                 const game = await this.createGame({
                     name: this.game.name,
@@ -72,7 +70,11 @@ export default defineComponent({
         }
     },
     async mounted() {
-        this.availableManagers = await this.getAllManagers();
+        try {
+            this.availableManagers = await this.getAllManagers();
+        } catch (e) {
+            this.$toast.add({ severity: 'error', summary: 'Ошибка загрузки пользователей', detail: e.response.data.detail, life: 3000 });
+        }
     }
 })
 </script>

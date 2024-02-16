@@ -9,10 +9,11 @@ import Auth from "@/views/Auth.vue";
 import Page403 from "@/views/Page403.vue";
 import Page404 from "@/views/Page404.vue";
 import store from "@/store";
+import Payment from "@/views/Payment.vue";
 
 const routes = [
   {
-    path: '/auth/login',
+    path: '/auth',
     component: Auth
   },
   {
@@ -39,6 +40,13 @@ const routes = [
   {
     path: '/account',
     component: Account,
+    meta: {
+      requireAuth: true
+    }
+  },
+  {
+    path: '/payment',
+    component: Payment,
     meta: {
       requireAuth: true
     }
@@ -74,7 +82,7 @@ router.beforeEach((to, from, next) => {
   const requireAuth = to.matched.some(record => record.meta.requireAuth);
 
   if (requireAuth && !currentUser) {
-    next('/auth/login');
+    next('/auth');
     return;
   }
 

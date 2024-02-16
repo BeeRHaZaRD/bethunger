@@ -26,15 +26,15 @@ export function dateTimeToString(dateTime) {
  * @param {number} seconds
  * @returns {string}
  */
-export function formatTimer(days, hours, minutes, seconds) {
-  const _days = days.toString();
+export function formatTime(days, hours, minutes, seconds) {
   const _hours = hours.toString().padStart(2, '0');
   const _minutes = minutes.toString().padStart(2, '0');
   const _seconds = seconds.toString().padStart(2, '0');
-  const daysWord = wordCase(days, ['день', 'дня', 'дней']);
   if (days === 0) {
     return `${_hours}:${_minutes}:${_seconds}`;
   } else {
+    const _days = days.toString();
+    const daysWord = wordCase(days, ['день', 'дня', 'дней']);
     return `${_days} ${daysWord} ${_hours}:${_minutes}:${_seconds}`;
   }
 }
@@ -48,14 +48,19 @@ export function wordCase(value, words){
   return words[2];
 }
 
-export function makeFullName(entity) {
-  return entity ? (entity.firstName + ' ' + entity.lastName) : null;
+/**
+ * Choose a word form according to specified gender
+ * @param {string} gender
+ * @param {string} w1
+ * @param {string} w2
+ * @returns {string}
+ */
+export function wordFormByGender(gender, w1, w2) {
+  return gender === 'MALE' ? w1 : w2;
 }
 
-export function clickDropdown(ref) {
-  setTimeout(() => {
-    ref.container.querySelector('.p-dropdown .p-inputtext').click();
-  }, 100);
+export function makeFullName(entity) {
+  return entity ? (entity.firstName + ' ' + entity.lastName) : null;
 }
 
 export function focusDropdown(ref) {
@@ -72,4 +77,8 @@ export function focusDropdown(ref) {
  */
 export function getPlayerIndex(district, sexNum) {
   return 2 * district + sexNum - 2;
+}
+
+export function delay(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
 }

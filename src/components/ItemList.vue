@@ -37,11 +37,15 @@ export default defineComponent({
             removeItem: 'game/removeItem'
         }),
         async removeItemWrapper(item) {
-            await this.removeItem({
-                gameId: this.$route.params.id,
-                item: item
-            });
-            this.$toast.add({ severity: 'success', summary: 'Предмет успешно удален', life: 3000 });
+            try {
+                await this.removeItem({
+                    gameId: this.$route.params.id,
+                    item: item
+                });
+                this.$toast.add({ severity: 'success', summary: 'Предмет успешно удален', life: 3000 });
+            } catch (e) {
+                this.$toast.add({ severity: 'error', summary: 'Ошибка удаления предмета', detail: e.response.data.detail, life: 3000 });
+            }
         },
     }
 })
