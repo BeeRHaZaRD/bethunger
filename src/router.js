@@ -10,6 +10,7 @@ import Page403 from "@/views/Page403.vue";
 import Page404 from "@/views/Page404.vue";
 import store from "@/store";
 import Payment from "@/views/Payment.vue";
+import BetHistory from "@/views/BetHistory.vue";
 
 const routes = [
   {
@@ -47,6 +48,13 @@ const routes = [
   {
     path: '/payment',
     component: Payment,
+    meta: {
+      requireAuth: true
+    }
+  },
+  {
+    path: '/bets',
+    component: BetHistory,
     meta: {
       requireAuth: true
     }

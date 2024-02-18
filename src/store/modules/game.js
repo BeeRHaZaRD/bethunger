@@ -2,6 +2,7 @@ import axios from "@/axios";
 import {dateTimeToString, dateTimeToIso, makeFullName} from "@/utils/util"
 import moment from "moment";
 import store from "@/store";
+import {SEX_NUM} from "@/enums/enums";
 
 export const game = {
   namespaced: true,
@@ -96,15 +97,15 @@ export const game = {
       state.plannedEvents.find(_plannedEvent => _plannedEvent.id === plannedEvent.id).status = status;
     },
     addPlayer(state, player) {
-      const sexNum = player.sex === 'MALE' ? 0 : 1;
+      const sexNum = SEX_NUM[player.sex];
       state.players[player.district][sexNum] = player;
     },
     removePlayer(state, player) {
-      const sexNum = player.sex === 'MALE' ? 0 : 1;
+      const sexNum = SEX_NUM[player.sex];
       state.players[player.district][sexNum] = null;
     },
     setTrainResults(state, {player, trainResults}) {
-      const sexNum = player.sex === 'MALE' ? 0 : 1;
+      const sexNum = SEX_NUM[player.sex];
       state.players[player.district][sexNum].trainResults = trainResults;
     },
     addItem(state, item) {
@@ -114,12 +115,16 @@ export const game = {
       state.items = state.items.filter(_item => _item.id !== item.id);
     },
     setPlayerStatus(state, {player, status}) {
-      const sexNum = player.sex === 'MALE' ? 0 : 1;
+      const sexNum = SEX_NUM[player.sex];
       state.players[player.district][sexNum].status = status;
     },
     setPlayerCooldownTo(state, {player, cooldownTo}) {
-      const sexNum = player.sex === 'MALE' ? 0 : 1;
+      const sexNum = SEX_NUM[player.sex];
       state.players[player.district][sexNum].cooldownTo = cooldownTo;
+    },
+    setPlayerOdd(state, {player, odd}) {
+      const sexNum = SEX_NUM[player.sex];
+      state.players[player.district][sexNum].odd = odd;
     },
     setItemAvailable(state, {item, available}) {
       const targetItem = state.items.find(_item => _item.id === item.id);
@@ -305,6 +310,27 @@ export const game = {
         commit('setPlayerCooldownTo', {player: supply.player, cooldownTo: supply.player.cooldownTo});
         commit('setItemAvailable', {item: supply.item, available: false});
         store.commit('account/subtractMoney', supply.amount);
+      });
+    },
+    makeBet({commit}, {playerId, amount}) {
+      return axios({
+        method: 'post',
+        url: '/bets',
+        data: {
+          playerId,
+          amount
+        }
+      });
+    },
+    fetchPlayersOdds({commit}, gameId) {
+      return axios({
+        method: 'get',
+        url: '/games/' + gameId + '/odds'
+      }).then(response => {
+        console.log(response.data);
+        response.data.forEach(player => {
+          commit('setPlayerOdd', {player, odd: player.odd});
+        })
       });
     }
   }

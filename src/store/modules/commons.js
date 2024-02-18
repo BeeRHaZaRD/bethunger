@@ -27,6 +27,15 @@ export const commons = {
         return response.data;
       });
     },
+    getAllBets() {
+      return axios({
+        method: 'get',
+        url: '/bets'
+      }).then(response => {
+        console.log(response.data);
+        return response.data;
+      });
+    },
     getAvailablePlayers({}, {district, sex}) {
       return axios({
         method: 'get',

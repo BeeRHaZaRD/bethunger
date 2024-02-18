@@ -126,6 +126,7 @@ export default {
             modalPublishVisible: false,
             modalStartVisible: false,
             eventPollingId: null,
+            oddsPollingId: null,
             timer: null
         }
     },
@@ -179,6 +180,7 @@ export default {
         ...mapActions({
             fetchGame: 'game/fetchGame',
             fetchHappenedEvents: 'game/fetchHappenedEvents',
+            fetchPlayersOdds: 'game/fetchPlayersOdds',
             publishGame: 'game/publishGame',
             startGame: 'game/startGame'
         }),
@@ -222,13 +224,20 @@ export default {
         },
         pollEvents() {
             if (this.status !== 'ONGOING')
-                return
+                return;
             this.eventPollingId = setInterval(() => {
                 this.fetchHappenedEvents({
                     gameId: this.$route.params.id,
                     after: this.happenedEvents.length > 0 ? this.happenedEvents[0].happenedAt : dateTimeToIso(this.dateStart)
                 })
             }, 5000);
+        },
+        pollPlayersOdds() {
+            if (this.status !== 'PLANNED')
+                return;
+            this.oddsPollingId = setInterval(() => {
+                this.fetchPlayersOdds(this.$route.params.id)
+            }, 3000);
         }
     },
     async mounted() {
@@ -241,12 +250,17 @@ export default {
                 this.timer = useStopwatch(Math.round((new Date() - this.dateStart) / 1000), true);
             }
             this.pollEvents();
+            this.pollPlayersOdds();
         } catch {}
     },
     beforeUnmount() {
         if (this.eventPollingId) {
             clearInterval(this.eventPollingId);
             this.eventPollingId = null;
+        }
+        if (this.oddsPollingId) {
+            clearInterval(this.oddsPollingId);
+            this.oddsPollingId = null;
         }
         // for the watcher to work correctly
         if (this.isDataLoaded) {

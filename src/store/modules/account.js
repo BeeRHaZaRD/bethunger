@@ -23,8 +23,6 @@ export const account = {
         url: '/account/balance'
       }).then(response => {
         commit('setBalance', response.data.balance);
-      }).catch(e => {
-        console.log(e);
       });
     },
     deposit({commit}, amount) {

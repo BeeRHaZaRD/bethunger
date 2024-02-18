@@ -48,6 +48,12 @@ export const INJURY_DEGREE = Object.freeze({
   'SEVERE_INJURY': 'тяжелое'
 });
 
+export const BET_STATUS = Object.freeze({
+  'PLACED': 'размещена',
+  'WIN': 'победа',
+  'LOSS': 'поражение'
+});
+
 export const SEX_NAME = Object.freeze({
   'MALE': 'мужчина',
   'FEMALE': 'женщина'
@@ -68,3 +74,9 @@ export const SEX = Object.freeze({
   0: 'MALE',
   1: 'FEMALE'
 });
+
+export const SEX_NUM = Object.freeze({
+  'MALE': 0,
+  'FEMALE': 1
+});
+

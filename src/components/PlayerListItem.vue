@@ -12,8 +12,11 @@
             </template>
             <template v-else-if="gameStatus === 'PLANNED' || gameStatus === 'ONGOING'">
                 <div v-if="player.status !== 'DEAD'" ref="playerButtons" class="buttons">
-                    <Button v-if="gameStatus === 'PLANNED'" label="Ставка x1.50" severity="info" @click="openMakeBetOp"/>
-                    <Button v-if="gameStatus === 'ONGOING'" label="x1.50" severity="info" disabled/>
+                    <Button v-if="gameStatus === 'PLANNED'" severity="info" @click="openMakeBetOp">
+                        <span>Ставка</span>
+                        <span :class="{'p-text-green': isOddUp, 'p-text-red': isOddDown}">&nbsp;{{oddString}}</span>
+                    </Button>
+                    <Button v-else-if="gameStatus === 'ONGOING'" :label="oddString" severity="info" disabled/>
 
                     <template v-if="gameStatus === 'ONGOING'">
                         <Button v-if="isSuppliable" icon="pi pi-box" @click="openMakeSupplyOp"/>
@@ -38,7 +41,7 @@
     </div>
 
     <OverlayPanel ref="opMakeBet">
-        <Bet :player="player" :coefficient="2.7"/>
+        <Bet :player="player" :odd="oddRounded" @success="closeMakeBetOp"/>
     </OverlayPanel>
     <OverlayPanel ref="opMakeSupply">
         <Supply :player="player" @success="closeMakeSupplyOp"/>
@@ -68,7 +71,9 @@ export default {
     },
     data() {
         return {
-            PLAYER_STATUS_SEVERITY: PLAYER_STATUS_SEVERITY
+            PLAYER_STATUS_SEVERITY: PLAYER_STATUS_SEVERITY,
+            isOddUp: false,
+            isOddDown: false
         }
     },
     computed: {
@@ -83,6 +88,23 @@ export default {
                 return null;
             }
             return new Date(this.player.cooldownTo) - new Date();
+        },
+        oddRounded() {
+            return this.player.odd ? this.player.odd.toFixed(2) : null;
+        },
+        oddString() {
+            return this.oddRounded ? 'x' + this.oddRounded.toString() : '';
+        }
+    },
+    watch: {
+        oddRounded(newVal, oldVal) {
+            if (newVal > oldVal) {
+                this.isOddUp = true;
+                setTimeout(() => this.isOddUp = false, 2500);
+            } else if (newVal < oldVal) {
+                this.isOddDown = true;
+                setTimeout(() => this.isOddDown = false, 2500);
+            }
         }
     },
     methods: {
