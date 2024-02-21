@@ -24,7 +24,7 @@
                     <router-link class="main-menu-item" to="/" @click.native="closeSidebar">
                         <i class="pi pi-home"></i>
                     </router-link>
-                    <router-link class="main-menu-item" to="/admin" @click.native="closeSidebar">
+                    <router-link class="main-menu-item" to="/bet-history" @click.native="closeSidebar">
                         <i class="pi pi-th-large"></i>
                     </router-link>
                     <router-link class="main-menu-item" to="/account" @click.native="closeSidebar">
@@ -51,9 +51,6 @@ export default {
         return {
             sidebarVisible: false,
             userMenuItems: [
-                { label: 'Профиль', icon: 'pi pi-fw pi-user' },
-                { label: 'Настройки', icon: 'pi pi-fw pi-cog' },
-                { separator: true },
                 {
                     label: 'Выход',
                     icon: 'pi pi-fw pi-sign-out',

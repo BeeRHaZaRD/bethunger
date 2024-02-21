@@ -53,7 +53,7 @@ const routes = [
     }
   },
   {
-    path: '/bets',
+    path: '/bet-history',
     component: BetHistory,
     meta: {
       requireAuth: true
